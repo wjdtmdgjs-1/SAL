@@ -9,9 +9,12 @@ import com.sparta.sal.domain.member.enums.MemberRole;
 import com.sparta.sal.domain.member.repository.MemberRepository;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import com.sparta.sal.domain.workspace.repository.WorkSpaceRepository;
+import com.sparta.sal.domain.workspace.service.WorkSpaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final WorkSpaceRepository workSpaceRepository;
+    private final WorkSpaceService workSpaceService;
 
     @Transactional
     public MemberResponseDto changeWorkSpace(AuthUser authUser, Long memberid, Long workspaceid, MemberRequestDto memberRequestDto) {
-        Member member = memberRepository.findById(memberid).orElseThrow(()->new NullPointerException("no such member"));
-        WorkSpace workSpace = workSpaceRepository.findById(workspaceid).orElseThrow(()->new NullPointerException("no such workspace"));
+        Member member = findMember(memberid);
+        WorkSpace workSpace = workSpaceService.findWorkSpace(workspaceid);
         //admin유저가 해당 workspace를 만든 유저인지 체크
-        if(authUser.getId().equals(workSpace.getCreaterId())){
+        if(authUser.getId().equals(workSpace.getMakerId())){
             throw new InvalidRequestException("you are not creater of workspace");
         }
         //해당 멤버가 해당 워크스페이스의 멤버인지 체크
@@ -47,24 +50,29 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDto changeMemberRole(AuthUser authUser, Long memberid, MemberRequestDto memberRequestDto) {
-        Member member = memberRepository.findById(memberid).orElseThrow(()->new NullPointerException("no such member"));
-        Member workSpaceMember = memberRepository.findByUserId(authUser.getId()).orElseThrow(()->new NullPointerException("no such member"));
-        //본인의 memberRole이 workspace인지 확인
-        if(!workSpaceMember.getMemberRole().equals(MemberRole.WORKSPACE)){
-            throw new InvalidRequestException("you are not allowed");
-        }
-        //바꾸고자 하는 member가 본인과 같은 workspace인지 확인
-        if (!workSpaceMember.getWorkSpace().equals(member.getWorkSpace())) {
-            throw new InvalidRequestException("that member is not your member");
-        }
+        Member member = findMember(memberid);
+        List<Member> workSpaceMember = memberRepository.findByUserIdAndMemberRole(authUser.getId(),MemberRole.WORKSPACE);
+
         //바꾸려는 memberRole이 workspace인지 확인
         if(member.getMemberRole().equals(MemberRole.WORKSPACE)){
-            throw new InvalidRequestException("you are can't change workspace");
+            throw new InvalidRequestException("you can't change workspace");
         }
         if(memberRequestDto.getMemberRole().equals(MemberRole.WORKSPACE)){
-            throw new InvalidRequestException("you are can't change workspace");
+            throw new InvalidRequestException("you can't change workspace");
         }
-        member.update(memberRequestDto.getMemberRole());
-        return new MemberResponseDto(member.getWorkSpace().getId(),member.getUser().getId(),memberid,member.getMemberRole());
+
+        //바꾸고자 하는 member가 본인이 memberRole.workSpace로 있는 곳 과 같은 workspace인지 확인
+        for(Member m: workSpaceMember){
+            if (m.getWorkSpace().equals(member.getWorkSpace())) {
+                member.update(memberRequestDto.getMemberRole());
+                return new MemberResponseDto(member.getWorkSpace().getId(),member.getUser().getId(),memberid,member.getMemberRole());
+            }
+        }
+        throw new InvalidRequestException("the member is not your ");
     }
+
+    public Member findMember(Long memberid){
+        return memberRepository.findById(memberid).orElseThrow(()->new NullPointerException("no such member"));
+    }
+
 }

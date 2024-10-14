@@ -21,11 +21,11 @@ public class Member extends Timestamped {
     private MemberRole memberRole;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "workSpace")
+    @JoinColumn(name = "workspace_id")
     private WorkSpace workSpace;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id")
     private User user;
 
     public Member(User user, WorkSpace workSpace, MemberRole memberRole) {

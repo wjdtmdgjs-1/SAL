@@ -72,7 +72,7 @@ public class UserService {
      * @param userId : 사용자 ID
      * @return User : 사용자 Entity 객체
      */
-    private User isValidUser(long userId) {
+    public User isValidUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new InvalidRequestException("User not found"));
 

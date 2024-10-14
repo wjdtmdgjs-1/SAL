@@ -8,21 +8,22 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "workSpaces")
+@Table(name = "workspaces")
 public class WorkSpace extends Timestamped {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long createrId;
+    private Long makerId;
 
     private String workSpaceTitle;
 
-    private String explain;
+    private String explains;
 
-    public WorkSpace(Long createrId,String workSpaceTitle, String explain) {
-        this.createrId=createrId;
+    public WorkSpace(Long makerId,String workSpaceTitle, String explain) {
+        this.makerId=makerId;
         this.workSpaceTitle = workSpaceTitle;
-        this.explain = explain;
+        this.explains = explain;
     }
 }
