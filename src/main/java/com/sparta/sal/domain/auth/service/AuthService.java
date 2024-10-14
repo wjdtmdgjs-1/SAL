@@ -24,6 +24,16 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    /**
+     * 이메일이 중복되는지 확인 후
+     * 비밀번호 인코딩 후
+     * 권한이 유효한 권한인지 확인 후
+     * 유저 생성 후
+     * 토큰을 생성하고 쿠키에 담아 반환
+     *
+     * @param signupRequest : email, 비밀번호, 권한이 담긴 DTO 객체
+     * @return signupResponse : 토큰이 들어있는 DTO 객체 반환
+     */
     @Transactional
     public SignupResponse signup(SignupRequest signupRequest) {
 
@@ -35,23 +45,32 @@ public class AuthService {
 
         UserRole userRole = UserRole.of(signupRequest.getUserRole());
 
-        User newUser = new User(
-                signupRequest.getEmail(),
-                encodedPassword,
-                userRole
-        );
+        User newUser = User.from(signupRequest.getEmail(), encodedPassword, userRole);
+
         User savedUser = userRepository.save(newUser);
 
         String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
 
         jwtUtil.addJwtToCookie(bearerToken);
 
-        return new SignupResponse(bearerToken);
+        return SignupResponse.of(bearerToken);
     }
 
+    /**
+     * 유저가 유효한지 확인 후
+     * 비밀번호가 일치하는지 확인 후
+     * 토큰을 생성하고 쿠키에 담아 반환
+     *
+     * @param signinRequest : email, 비밀번호가 담긴 DTO 객체
+     * @return signinResponse : 토큰이 담긴 DTO 객체 반환
+     */
     public SigninResponse signin(SigninRequest signinRequest) {
         User user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(
                 () -> new InvalidRequestException("가입되지 않은 유저입니다."));
+
+        if (user.getUserStatus().equals(false)) {
+            throw new InvalidRequestException("탈퇴한 사용자입니다.");
+        }
 
         // 로그인 시 이메일과 비밀번호가 일치하지 않을 경우 401을 반환합니다.
         if (!passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
@@ -62,6 +81,6 @@ public class AuthService {
 
         jwtUtil.addJwtToCookie(bearerToken);
 
-        return new SigninResponse(bearerToken);
+        return SigninResponse.of(bearerToken);
     }
 }

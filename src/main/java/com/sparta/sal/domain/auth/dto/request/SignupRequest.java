@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignupRequest {
 
-    @NotBlank @Email
+    @NotBlank
+    @Email
     private String email;
 
     @NotBlank
@@ -19,7 +20,4 @@ public class SignupRequest {
 
     @NotBlank
     private String userRole;
-
-    @NotBlank
-    private String nickname;
 }

@@ -23,11 +23,17 @@ public class User extends Timestamped {
 
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-    
-    public User(String email, String password, UserRole userRole) {
+
+    private Boolean userStatus = true;
+
+    private User(String email, String password, UserRole userRole) {
         this.email = email;
         this.password = password;
         this.userRole = userRole;
+    }
+
+    public static User from(String email, String password, UserRole userRole) {
+        return new User(email, password, userRole);
     }
 
     private User(Long id, String email, UserRole userRole) {
@@ -40,7 +46,11 @@ public class User extends Timestamped {
         return new User(authUser.getId(), authUser.getEmail(), UserRole.of(authUser.getAuthorities().stream().toList().get(0).getAuthority()));
     }
 
-    public void updateRole(UserRole userRole) {
-        this.userRole = userRole;
+    public void withdrawUser() {
+        this.userStatus = false;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 }
