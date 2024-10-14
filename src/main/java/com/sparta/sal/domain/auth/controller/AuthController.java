@@ -7,6 +7,7 @@ import com.sparta.sal.domain.auth.dto.response.SignupResponse;
 import com.sparta.sal.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,12 +19,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/signup")
-    public SignupResponse signup(@Valid @RequestBody SignupRequest signupRequest) {
-        return authService.signup(signupRequest);
+    public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
+        return ResponseEntity.ok(authService.signup(signupRequest));
     }
 
     @PostMapping("/auth/signin")
-    public SigninResponse signin(@Valid @RequestBody SigninRequest signinRequest) {
-        return authService.signin(signinRequest);
+    public ResponseEntity<SigninResponse> signin(@Valid @RequestBody SigninRequest signinRequest) {
+        return ResponseEntity.ok(authService.signin(signinRequest));
     }
 }
