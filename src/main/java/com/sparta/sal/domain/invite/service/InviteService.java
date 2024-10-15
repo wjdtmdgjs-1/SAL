@@ -31,7 +31,8 @@ public class InviteService {
     private final WorkSpaceRepository workSpaceRepository;
 
     @Transactional
-    public InviteResponseDto inviteWorkSpaceMember(AuthUser authUser, InviteRequestDto inviteRequestDto) {
+    public InviteResponseDto inviteWorkSpaceMember(InviteRequestDto inviteRequestDto) {
+
         User user = userRepository.findById(inviteRequestDto.getUserId()).orElseThrow(()->new NullPointerException("no such user"));
         Invite savedInvite;
         //이미 같은 workspace에서 초대를 보냈는지, 이미 해당 workspace의 멤버인지를 체크한다.
@@ -98,6 +99,4 @@ public class InviteService {
         }
         inviteRepository.delete(invite);
     }
-
-
 }

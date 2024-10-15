@@ -23,9 +23,11 @@ public class Invite extends Timestamped {
     private Long workSpaceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     public Invite(User user, MemberRole memberRole, Long workSpaceId) {

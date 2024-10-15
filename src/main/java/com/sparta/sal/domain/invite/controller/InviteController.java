@@ -22,9 +22,8 @@ public class InviteController {
 
     @PostMapping("/admin/invites")
     @Secured(UserRole.Authority.ADMIN)
-    public ResponseEntity<InviteResponseDto> inviteWorkSpaceMember(@AuthenticationPrincipal AuthUser authUser,
-                                                                   @RequestBody InviteRequestDto inviteRequestDto){
-        return ResponseEntity.ok(inviteService.inviteWorkSpaceMember(authUser,inviteRequestDto));
+    public ResponseEntity<InviteResponseDto> inviteWorkSpaceMember(@RequestBody InviteRequestDto inviteRequestDto){
+        return ResponseEntity.ok(inviteService.inviteWorkSpaceMember(inviteRequestDto));
     }
 
     @PostMapping("/invites")
