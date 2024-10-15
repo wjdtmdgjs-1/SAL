@@ -22,12 +22,12 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final WorkSpaceService workSpaceService;
+    private final WorkSpaceRepository workSpaceRepository;
 
     @Transactional
     public MemberResponseDto changeWorkSpace(AuthUser authUser, Long memberid, Long workspaceid, MemberRequestDto memberRequestDto) {
         Member member = findMember(memberid);
-        WorkSpace workSpace = workSpaceService.findWorkSpace(workspaceid);
+        WorkSpace workSpace = findWorkSpace(workspaceid);
         //admin유저가 해당 workspace를 만든 유저인지 체크
         if(authUser.getId().equals(workSpace.getMakerId())){
             throw new InvalidRequestException("you are not creater of workspace");
@@ -75,4 +75,7 @@ public class MemberService {
         return memberRepository.findById(memberid).orElseThrow(()->new NullPointerException("no such member"));
     }
 
+    public WorkSpace findWorkSpace(long workspaceid){
+        return workSpaceRepository.findById(workspaceid).orElseThrow(()->new NullPointerException("no such workspace"));
+    }
 }
