@@ -2,10 +2,11 @@ package com.sparta.sal.domain.card.entiry;
 
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
+import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
+import com.sparta.sal.domain.card.dto.request.SaveCardRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,10 +25,28 @@ public class Card extends Timestamped {
     private String cardExplain;
     private LocalDateTime deadline;
     private String attachment;
+    private boolean isDeleted=false;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.REMOVE)
     private  List<Assignee> assignees = new ArrayList<>();
 
+    public Card(SaveCardRequest reqDto){
+        this.cardTitle = reqDto.getTitle();
+        this.cardExplain= reqDto.getCardExplain();
+        this.deadline = reqDto.getDeadline();
+        this.attachment = reqDto.getAttachment();
+    }
+
+    public void modifyCard(ModifyCardRequest reqDto){
+        this.cardTitle = reqDto.getTitle();
+        this.cardExplain= reqDto.getCardExplain();
+        this.deadline = reqDto.getDeadline();
+        this.attachment = reqDto.getAttachment();
+    }
+
+    public void deleteCard(){
+        this.isDeleted=true;
+    }
 
 
 }
