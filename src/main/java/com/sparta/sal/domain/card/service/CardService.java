@@ -166,7 +166,7 @@ public class CardService {
         String rankingKey = generateRankingKey(listId);
 
         // 어뷰징 방지
-        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(abuseKey, 1, 60, TimeUnit.SECONDS);
+        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(abuseKey, 1, 1, TimeUnit.HOURS);
         if (Boolean.FALSE.equals(isNew)) {
             return;
         }
