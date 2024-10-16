@@ -1,5 +1,6 @@
 package com.sparta.sal.domain.workspace.entity;
 
+import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.member.entity.Member;
@@ -54,5 +55,10 @@ public class WorkSpace extends Timestamped {
     public void update(String workSpaceTitle, String explain) {
         this.workSpaceTitle=workSpaceTitle;
         this.explains=explain;
+    }
+
+    public boolean isMember(AuthUser authUser) {
+        return memberList.stream()
+                .anyMatch(member -> member.getUser().getId().equals(authUser.getId()));
     }
 }
