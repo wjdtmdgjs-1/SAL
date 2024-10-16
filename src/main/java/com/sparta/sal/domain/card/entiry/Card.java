@@ -48,6 +48,10 @@ public class Card extends Timestamped {
         this.attachment = reqDto.getAttachment();
     }
 
+    public void deleteAttachment() {
+        this.attachment = null;
+    }
+
     public void deleteCard() {
         this.isDeleted = true;
     }

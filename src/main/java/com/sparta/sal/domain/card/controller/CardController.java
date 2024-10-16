@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/lists/{listId}/cards")
+@RequestMapping("/api/v1/lists")
 public class CardController {
     private final CardService cardService;
 
@@ -31,14 +31,14 @@ public class CardController {
         return ResponseEntity.ok().body(cardService.saveCard(attachment, title, cardExplain, deadline, listId, authUser));
     }
 
-    @GetMapping("/{cardId}")
+    @GetMapping("/{listId}/cards/{cardId}")
     public ResponseEntity<GetCardResponse> getCard(@AuthenticationPrincipal AuthUser authUser,
                                                    @PathVariable Long listId,
                                                    @PathVariable Long cardId) {
         return ResponseEntity.ok().body(cardService.getCard(authUser, listId, cardId));
     }
 
-    @PutMapping("/{cardId}")
+    @PutMapping("/{listId}/cards/{cardId}")
     public ResponseEntity<ModifyCardResponse> modifyCard(@PathVariable Long listId,
                                                          @AuthenticationPrincipal AuthUser authUser,
                                                          @PathVariable Long cardId,
@@ -46,7 +46,7 @@ public class CardController {
         return ResponseEntity.ok().body(cardService.modifyCard(listId, authUser, cardId, reqDto));
     }
 
-    @DeleteMapping("/{cardId}")
+    @DeleteMapping("/{listId}/cards/{cardId}")
     public void deleteCard(@AuthenticationPrincipal AuthUser authUser,
                            @PathVariable Long listId,
                            @PathVariable Long cardId) {
