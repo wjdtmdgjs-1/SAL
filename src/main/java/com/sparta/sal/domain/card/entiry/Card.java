@@ -3,8 +3,6 @@ package com.sparta.sal.domain.card.entiry;
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
 import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
-import com.sparta.sal.domain.card.dto.request.SaveCardRequest;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,35 +24,40 @@ public class Card extends Timestamped {
     private String cardExplain;
     private LocalDateTime deadline;
     private String attachment;
-    private boolean isDeleted=false;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.REMOVE)
-    private  List<Assignee> assignees = new ArrayList<>();
+    private List<Assignee> assignees = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id", nullable = false)
     private com.sparta.sal.domain.list.entity.List list;
 
-    public Card(SaveCardRequest reqDto){
+    public Card(String title, String cardExplain, LocalDateTime deadline, String filename) {
+        this.cardTitle = title;
+        this.cardExplain = cardExplain;
+        this.deadline = deadline;
+        this.attachment = filename;
+    }
+
+
+    public void modifyCard(ModifyCardRequest reqDto) {
         this.cardTitle = reqDto.getTitle();
-        this.cardExplain= reqDto.getCardExplain();
+        this.cardExplain = reqDto.getCardExplain();
         this.deadline = reqDto.getDeadline();
         this.attachment = reqDto.getAttachment();
     }
 
-    public void modifyCard(ModifyCardRequest reqDto){
-        this.cardTitle = reqDto.getTitle();
-        this.cardExplain= reqDto.getCardExplain();
-        this.deadline = reqDto.getDeadline();
-        this.attachment = reqDto.getAttachment();
+    public void deleteAttachment() {
+        this.attachment = null;
     }
 
-    public void deleteCard(){
-        this.isDeleted=true;
+    public void deleteCard() {
+        this.isDeleted = true;
     }
 
-    public void addList(com.sparta.sal.domain.list.entity.List list){
-        this.list=list;
+    public void addList(com.sparta.sal.domain.list.entity.List list) {
+        this.list = list;
     }
 
 

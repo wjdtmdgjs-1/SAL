@@ -24,6 +24,10 @@ repositories {
 }
 
 dependencies {
+    // aws
+    implementation 'software.amazon.awssdk:s3:2.20.40' // 먼저 넣은 애
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.300' // 최신 버전 확인 후 사용
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
