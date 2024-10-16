@@ -7,22 +7,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    List<Member> findByUserIdAndMemberRole(Long id, MemberRole memberRole);
+    List<Member> findByUserIdAndMemberRole(long id, MemberRole memberRole);
 
-    @Query("SELECT m.workSpace FROM Member m WHERE m.user.id = :userid")
-    List<WorkSpace> findWorkSpaceIdByUserId(@Param("userid") long userid);
+    @Query("SELECT m.workSpace FROM Member m WHERE m.user.id = :userId")
+    List<WorkSpace> findWorkSpaceIdByUserId(@Param("userId") long userId);
 
-    @Query("SELECT m FROM Member m WHERE m.user.id=:userid AND m.memberRole = :memberRole AND m.workSpace.id = :workSpaceId")
-    Optional<Member> findByUserIdAndMemberRoleAndWorkSpaceId(@Param("userid") Long userid,
-                                                             @Param("memberRole")MemberRole memberRole,
-                                                             @Param("workSpaceId")Long workSpaceId);
+    @Query("SELECT m FROM Member m WHERE m.user.id = :userId AND m.memberRole = :memberRole AND m.workSpace.id = :workSpaceId")
+    Optional<Member> findByUserIdAndMemberRoleAndWorkSpaceId(@Param("userId") long userId,
+                                                             @Param("memberRole") MemberRole memberRole,
+                                                             @Param("workSpaceId") long workSpaceId);
 
-    @Query("SELECT m FROM Member m WHERE m.user.id = :userid AND m.workSpace.id = :workSpaceId")
-    Optional<Member> findMemberWithUserIdAndWorkSpaceId(@Param("userid") Long userid,@Param("workSpaceId") Long workSpaceId);
+    @Query("SELECT m FROM Member m WHERE m.user.id = :userId AND m.workSpace.id = :workSpaceId")
+    Optional<Member> findMemberWithUserIdAndWorkSpaceId(@Param("userId") long userId, @Param("workSpaceId") long workSpaceId);
 
+    @Query("SELECT m FROM Member m WHERE m.workSpace.id = :workSpaceId AND m.user.id = :userId")
+    Optional<Member> checkDuplicate(@Param("workSpaceId") long workSpaceId, @Param("userId") long userId);
 }

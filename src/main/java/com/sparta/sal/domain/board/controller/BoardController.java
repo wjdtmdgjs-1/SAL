@@ -5,7 +5,6 @@ import com.sparta.sal.domain.board.dto.request.BoardRequestDto;
 import com.sparta.sal.domain.board.dto.response.BoardResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardSimpleResponseDto;
 import com.sparta.sal.domain.board.service.BoardService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,15 +20,15 @@ public class BoardController {
 
     @PostMapping("/{workSpaceId}/boards")
     public ResponseEntity<BoardResponseDto> postBoard(@AuthenticationPrincipal AuthUser authUser,
-                                                      @PathVariable Long workSpaceId,
+                                                      @PathVariable long workSpaceId,
                                                       @RequestBody BoardRequestDto boardRequestDto){
         return ResponseEntity.ok(boardService.postBoard(authUser,workSpaceId,boardRequestDto));
     }
 
     @PutMapping("/{workSpaceId}/boards/{boardId}")
     public ResponseEntity<BoardResponseDto> updateBoard(@AuthenticationPrincipal AuthUser authUser,
-                                                        @PathVariable Long workSpaceId,
-                                                        @PathVariable Long boardId,
+                                                        @PathVariable long workSpaceId,
+                                                        @PathVariable long boardId,
                                                         @RequestBody BoardRequestDto boardRequestDto){
         return ResponseEntity.ok(boardService.updateBoard(authUser,workSpaceId,boardId,boardRequestDto));
     }
@@ -40,7 +39,7 @@ public class BoardController {
     }
 
     @DeleteMapping("/boards/{boardId}")
-    public void deleteBoard(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long boardId){
+    public void deleteBoard(@AuthenticationPrincipal AuthUser authUser, @PathVariable long boardId){
         boardService.deleteBoard(authUser,boardId);
     }
 }

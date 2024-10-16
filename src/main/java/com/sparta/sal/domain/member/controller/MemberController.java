@@ -17,16 +17,16 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
-    @PutMapping("/admin/members")
+    @PutMapping("/admin/{workSpaceId}/members/{memberId}")
     @Secured(UserRole.Authority.ADMIN)
-    public ResponseEntity<MemberResponseDto> changeWorkSpace(@AuthenticationPrincipal AuthUser authUser, @RequestParam Long memberid,
-                                                             @RequestParam Long workspaceid, @RequestBody MemberRequestDto memberRequestDto){
-        return ResponseEntity.ok(memberService.changeWorkSpace(authUser,memberid,workspaceid,memberRequestDto));
+    public ResponseEntity<MemberResponseDto> changeWorkSpace(@AuthenticationPrincipal AuthUser authUser, @PathVariable long memberId,
+                                                             @PathVariable long workSpaceId, @RequestBody MemberRequestDto memberRequestDto){
+        return ResponseEntity.ok(memberService.changeWorkSpace(authUser,memberId,workSpaceId,memberRequestDto));
     }
 
-    @PutMapping("/members")
-    public ResponseEntity<MemberResponseDto> changeMemberRole(@AuthenticationPrincipal AuthUser authUser, @RequestParam Long memberid,
+    @PutMapping("/members/{memberId}")
+    public ResponseEntity<MemberResponseDto> changeMemberRole(@AuthenticationPrincipal AuthUser authUser, @PathVariable long memberId,
                                                               @RequestBody MemberRequestDto memberRequestDto){
-        return ResponseEntity.ok(memberService.changeMemberRole(authUser,memberid,memberRequestDto));
+        return ResponseEntity.ok(memberService.changeMemberRole(authUser,memberId,memberRequestDto));
     }
 }

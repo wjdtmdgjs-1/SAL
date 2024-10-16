@@ -2,7 +2,6 @@ package com.sparta.sal.domain.board.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.list.entity.List;
-import com.sparta.sal.domain.user.entity.User;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

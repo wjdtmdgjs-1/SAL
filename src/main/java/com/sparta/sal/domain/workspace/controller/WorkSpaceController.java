@@ -9,7 +9,6 @@ import com.sparta.sal.domain.workspace.dto.response.PostMemberResponseDto;
 import com.sparta.sal.domain.workspace.dto.response.WorkSpaceResponseDto;
 import com.sparta.sal.domain.workspace.dto.response.WorkSpaceTitleResponseDto;
 import com.sparta.sal.domain.workspace.service.WorkSpaceService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -30,26 +29,20 @@ public class WorkSpaceController {
             return ResponseEntity.ok(workSpaceService.saveWorkSpace(authUser,workSpaceSaveRequestDto));
     }
 
-    @GetMapping("/workspaces")
-    public ResponseEntity<List<WorkSpaceResponseDto>> getWorkSpace(@RequestParam Long userid){
-        return ResponseEntity.ok(workSpaceService.getWorkSpace(userid));
+    @GetMapping("/workspaces/{userId}")
+    public ResponseEntity<List<WorkSpaceResponseDto>> getWorkSpaceList(@PathVariable long userId){
+        return ResponseEntity.ok(workSpaceService.getWorkSpaceList(userId));
     }
 
-    @PostMapping("/workspaces/members")
-    public ResponseEntity<PostMemberResponseDto> postMember(@AuthenticationPrincipal AuthUser authUser ,
-                                                            @RequestBody PostMemberRequestDto postMemberRequestDto){
-        return ResponseEntity.ok(workSpaceService.postMember(authUser,postMemberRequestDto));
-    }
-
-    @PutMapping("/workspaces")
-    public ResponseEntity<WorkSpaceTitleResponseDto> fixWorkSpace(@AuthenticationPrincipal AuthUser authUser,
-                                                                  @RequestParam Long workspaceid,
+    @PutMapping("/workspaces/{workSpaceId}")
+    public ResponseEntity<WorkSpaceTitleResponseDto> updateWorkSpace(@AuthenticationPrincipal AuthUser authUser,
+                                                                  @PathVariable long workSpaceId,
                                                                   @RequestBody WorkSpaceFixRequestDto workSpaceFixRequestDto){
-        return ResponseEntity.ok(workSpaceService.fixWorkSpace(authUser,workspaceid,workSpaceFixRequestDto));
+        return ResponseEntity.ok(workSpaceService.updateWorkSpace(authUser,workSpaceId,workSpaceFixRequestDto));
     }
 
-    @DeleteMapping("/workspaces")
-    public void deleteWorkSpace(@AuthenticationPrincipal AuthUser authUser, @RequestParam Long workspaceid){
-        workSpaceService.deleteWorkSpace(authUser,workspaceid);
+    @DeleteMapping("/workspaces/{workSpaceId}")
+    public void deleteWorkSpace(@AuthenticationPrincipal AuthUser authUser, @PathVariable long workSpaceId){
+        workSpaceService.deleteWorkSpace(authUser,workSpaceId);
     }
 }
