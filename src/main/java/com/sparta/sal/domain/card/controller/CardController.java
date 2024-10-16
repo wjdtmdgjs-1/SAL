@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.List;
@@ -56,13 +57,11 @@ public class CardController {
         cardService.deleteCard(listId, authUser, cardId);
     }
 
-    // card 첨부 파일 url 조회
     @GetMapping("/cards/{cardId}/attachment")
     public ResponseEntity<String> getAttachment(@PathVariable Long cardId) {
         return ResponseEntity.ok().body(cardService.getAttachment(cardId));
     }
 
-    // card 첨부 파일 삭제
     @DeleteMapping("/cards/{cardId}/attachment")
     public void deleteAttachment(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long cardId) {
         cardService.deleteAttachment(authUser, cardId);
@@ -74,4 +73,22 @@ public class CardController {
         List<GetCardResponse> topRankedCards = cardService.getTopRankedCards(listId, top);
         return ResponseEntity.ok(topRankedCards);
     }
+
+    @GetMapping("/{listId}/cards/search")
+    public ResponseEntity<List<GetCardResponse>> searchCards(
+            @PathVariable Long listId,
+            @RequestParam(required = false) String cardExplain,
+            @RequestParam(required = false) String cardTitle,
+            @RequestParam(required = false) LocalDate duedate,
+            @RequestParam(required = false) String deadline,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        List<GetCardResponse> cards = cardService.searchCards(
+                listId, cardTitle, cardExplain, duedate, deadline, page, size
+        );
+
+        return ResponseEntity.ok(cards);
+    }
+
 }
