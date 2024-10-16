@@ -24,4 +24,9 @@ public class Assignee extends Timestamped {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    public Assignee(Card card, Member member) {
+        this.card = card;
+        this.member = member;
+    }
+
 }
