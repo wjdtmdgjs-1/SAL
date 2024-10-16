@@ -40,12 +40,6 @@ public class Card extends Timestamped {
         this.attachment = filename;
     }
 
-    public Card(String title, String cardExplain, LocalDateTime deadline) {
-        this.cardTitle = title;
-        this.cardExplain = cardExplain;
-        this.deadline = deadline;
-    }
-
     public void modifyCard(ModifyCardRequest reqDto) {
         this.cardTitle = reqDto.getTitle();
         this.cardExplain = reqDto.getCardExplain();
