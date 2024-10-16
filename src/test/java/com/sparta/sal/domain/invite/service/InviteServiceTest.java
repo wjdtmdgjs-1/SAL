@@ -3,6 +3,7 @@ package com.sparta.sal.domain.invite.service;
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
 import com.sparta.sal.domain.invite.dto.request.InviteRequestDto;
+import com.sparta.sal.domain.invite.dto.response.InviteAcceptResponseDto;
 import com.sparta.sal.domain.invite.dto.response.InviteResponseDto;
 import com.sparta.sal.domain.invite.entity.Invite;
 import com.sparta.sal.domain.invite.repository.InviteRepository;
@@ -29,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class InviteServiceTest {
@@ -178,16 +181,80 @@ public class InviteServiceTest {
 
         assertNotNull(responseDto);
     }
-    /*@Test
+    @Test
     public void getInviteList_success(){
         AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
         List<Invite> inviteList = new ArrayList<>();
 
         given(inviteRepository.findByUserId(anyLong())).willReturn(inviteList);
 
-        List<InviteResponseDto> ResponseDto = inviteService.getInviteList(authUser);
+        List<InviteResponseDto> responseDto = inviteService.getInviteList(authUser);
 
+        assertNotNull(responseDto);
+    }
+    @Test
+    public void acceptInvite_wrongUser(){
+        AuthUser authUser = AuthUser.from(2L,"a@a.com",UserRole.ROLE_USER);
+        User user = User.from("a@a.com","password",UserRole.ROLE_USER);
+        ReflectionTestUtils.setField(user,"id",1L);
 
-    }*/
+        long inviteId=1L;
+        Invite invite = new Invite();
+        ReflectionTestUtils.setField(invite,"user",user);
+        ReflectionTestUtils.setField(invite,"workSpaceId",1L);
+        ReflectionTestUtils.setField(invite,"id",1L);
 
+        WorkSpace workSpace = new WorkSpace();
+
+        given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
+        given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
+
+        Exception exception = assertThrows(InvalidRequestException.class,()->inviteService.acceptInvite(authUser,inviteId));
+
+        assertEquals("you are not the owner of the invite", exception.getMessage());
+    }
+
+    @Test
+    public void acceptInvite_success(){
+        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
+        User user = User.from("a@a.com","password",UserRole.ROLE_USER);
+        ReflectionTestUtils.setField(user,"id",1L);
+
+        long inviteId=1L;
+        Invite invite = new Invite();
+        ReflectionTestUtils.setField(invite,"user",user);
+        ReflectionTestUtils.setField(invite,"workSpaceId",1L);
+        ReflectionTestUtils.setField(invite,"id",1L);
+        ReflectionTestUtils.setField(invite,"memberRole",MemberRole.BOARD);
+
+        WorkSpace workSpace = new WorkSpace();
+        ReflectionTestUtils.setField(workSpace,"id",1L);
+
+        Member member = new Member();
+        ReflectionTestUtils.setField(member,"id",1L);
+        ReflectionTestUtils.setField(member,"memberRole",MemberRole.BOARD);
+
+        given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
+        given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
+
+        InviteAcceptResponseDto dto = inviteService.acceptInvite(authUser,inviteId);
+
+        assertNotNull(dto);
+        verify(inviteRepository,times(1)).delete(invite);
+    }
+    @Test
+    public void refuseInvite() {
+        long inviteId = 1L;
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
+        Invite invite = new Invite();
+        User user = new User();
+        ReflectionTestUtils.setField(invite, "user", user);
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
+
+        inviteService.refuseInvite(authUser,inviteId);
+
+        verify(inviteRepository,times(1)).delete(invite);
+    }
 }
