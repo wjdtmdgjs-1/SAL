@@ -2,6 +2,8 @@ package com.sparta.sal.domain.card.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.domain.board.entity.Board;
+import com.sparta.sal.domain.board.repository.BoardRepository;
 import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
 import com.sparta.sal.domain.card.dto.response.GetCardResponse;
 import com.sparta.sal.domain.card.dto.response.ModifyCardResponse;
@@ -16,6 +18,9 @@ import com.sparta.sal.domain.member.repository.MemberRepository;
 import com.sparta.sal.domain.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -39,6 +45,7 @@ public class CardService {
     private final MemberRepository memberRepository;
     private final S3Service s3Service;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final BoardRepository boardRepository;
 
     @Transactional
     public SaveCardResponse saveCard(MultipartFile attachment, String title, String cardExplain, LocalDateTime deadline, Long listId, AuthUser authUser) {
@@ -130,6 +137,35 @@ public class CardService {
 
         card.deleteCard();
         cardRepository.save(card);
+    }
+
+    /**
+     * 카드 검색
+     *
+     * @param cardTitle
+     * @param cardExplain
+     * @param duedate
+     * @param deadline
+     * @param page
+     * @param size
+     * @return
+     */
+    public java.util.List<GetCardResponse> searchCards(Long listId, String cardTitle, String cardExplain, LocalDate duedate, String deadline, int page, int size) {
+        List list = listRepository.findById(listId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리스트를 찾을 수 없습니다: " + listId));
+
+        Board board = boardRepository.findById(list.getBoard().getId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 보드를 찾을 수 없습니다: " + list.getBoard().getId()));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Card> cards = cardRepository.searchCards(
+                board.getId(), cardTitle, cardExplain, duedate, deadline, pageable
+        );
+
+        return cards.stream()
+                .map(card -> new GetCardResponse(card, getViewCard(listId, card.getId())))
+                .toList();
     }
 
     //파일 조회
