@@ -1,7 +1,7 @@
 package com.sparta.sal.domain.comment.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
-import com.sparta.sal.domain.card.entiry.Card;
+import com.sparta.sal.domain.card.entity.Card;
 import com.sparta.sal.domain.comment.dto.request.ModifyCommentRequest;
 import com.sparta.sal.domain.comment.dto.request.SaveCommentRequest;
 import com.sparta.sal.domain.user.entity.User;
