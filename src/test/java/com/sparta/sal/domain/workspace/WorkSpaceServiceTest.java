@@ -24,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -57,21 +58,18 @@ public class WorkSpaceServiceTest {
         ReflectionTestUtils.setField(workSpaceSaveRequestDto, "userId", userId);
 
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace, "makerId", 1L);
+        ReflectionTestUtils.setField(workSpace, "makerId", userId);
         ReflectionTestUtils.setField(workSpace, "workSpaceTitle", "Test Workspace");
         ReflectionTestUtils.setField(workSpace, "explains", "Test explanation");
 
         given(userService.isValidUser(userId)).willReturn(user);
         given(workSpaceRepository.save(any(WorkSpace.class))).willReturn(workSpace);
 
-        // 실행
         WorkSpaceTitleResponseDto response = workSpaceService.saveWorkSpace(authUser, workSpaceSaveRequestDto);
 
-        // 검증
         assertNotNull(response);
-        verify(memberRepository).save(any(Member.class)); // 멤버가 저장되었는지 확인
+        verify(memberRepository).save(any(Member.class));
     }
-
     @Test
     void updateWorkSpace_validUser() {
         long userId = 1L;
@@ -82,7 +80,7 @@ public class WorkSpaceServiceTest {
         ReflectionTestUtils.setField(user, "id", userId);
 
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace, "id", workSpaceId); // 워크스페이스 ID 설정
+        ReflectionTestUtils.setField(workSpace, "id", workSpaceId);
         ReflectionTestUtils.setField(workSpace, "workSpaceTitle", "Original Title");
         ReflectionTestUtils.setField(workSpace, "explains", "Original explanation");
 
@@ -94,11 +92,10 @@ public class WorkSpaceServiceTest {
                 .willReturn(Optional.of(new Member(user, workSpace, MemberRole.WORKSPACE)));
         given(workSpaceRepository.findById(workSpaceId)).willReturn(Optional.of(workSpace));
 
-        // 실행
         WorkSpaceTitleResponseDto response = workSpaceService.updateWorkSpace(authUser, workSpaceId, requestDto);
 
-        // 검증
         assertNotNull(response);
+        assertEquals("Updated Title", response.getWorkSpaceTitle());
     }
 
     @Test
@@ -108,13 +105,12 @@ public class WorkSpaceServiceTest {
         AuthUser authUser = AuthUser.from(userId, "a@a.com", UserRole.ROLE_ADMIN);
 
         given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(userId, MemberRole.WORKSPACE, workSpaceId))
-                .willReturn(Optional.empty()); // 사용자가 워크스페이스 역할이 없음을 반환
+                .willReturn(Optional.empty());
 
         WorkSpaceFixRequestDto requestDto = new WorkSpaceFixRequestDto();
         ReflectionTestUtils.setField(requestDto, "workSpaceTitle", "Updated Title");
         ReflectionTestUtils.setField(requestDto, "explain", "Updated explanation");
 
-        // 실행 & 검증
         InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
                 workSpaceService.updateWorkSpace(authUser, workSpaceId, requestDto));
         assertEquals("you are not workspace role", exception.getMessage());
@@ -130,17 +126,15 @@ public class WorkSpaceServiceTest {
         ReflectionTestUtils.setField(user, "id", userId);
 
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace, "id", workSpaceId); // 워크스페이스 ID 설정
+        ReflectionTestUtils.setField(workSpace, "id", workSpaceId);
 
         given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(userId, MemberRole.WORKSPACE, workSpaceId))
                 .willReturn(Optional.of(new Member(user, workSpace, MemberRole.WORKSPACE)));
         given(workSpaceRepository.findById(workSpaceId)).willReturn(Optional.of(workSpace));
 
-        // 실행
         workSpaceService.deleteWorkSpace(authUser, workSpaceId);
 
-        // 검증
-        verify(workSpaceRepository).delete(workSpace); // 워크스페이스가 삭제되었는지 확인
+        verify(workSpaceRepository).delete(workSpace);
     }
 
     @Test
@@ -150,9 +144,8 @@ public class WorkSpaceServiceTest {
         AuthUser authUser = AuthUser.from(userId, "a@a.com", UserRole.ROLE_ADMIN);
 
         given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(userId, MemberRole.WORKSPACE, workSpaceId))
-                .willReturn(Optional.empty()); // 사용자가 워크스페이스 역할이 없음을 반환
+                .willReturn(Optional.empty());
 
-        // 실행 & 검증
         InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
                 workSpaceService.deleteWorkSpace(authUser, workSpaceId));
         assertEquals("you are not workspace role", exception.getMessage());
