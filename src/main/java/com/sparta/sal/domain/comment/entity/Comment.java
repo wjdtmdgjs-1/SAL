@@ -23,7 +23,7 @@ public class Comment extends Timestamped {
     private boolean isDeleted=false;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_id")
+    @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
     public Comment(SaveCommentRequest reqDto){

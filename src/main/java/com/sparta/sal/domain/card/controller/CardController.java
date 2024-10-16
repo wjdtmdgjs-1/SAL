@@ -14,28 +14,37 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/cards")
+@RequestMapping("/api/v1/lists/{listId}/cards")
 public class CardController {
     private final CardService cardService;
 
     @PostMapping
-    public ResponseEntity<SaveCardResponse> saveCard(@RequestBody SaveCardRequest reqDto){
-        return ResponseEntity.ok().body(cardService.saveCard(reqDto));
+    public ResponseEntity<SaveCardResponse> saveCard( @AuthenticationPrincipal AuthUser authUser,
+                                                      @PathVariable Long listId,
+                                                      @RequestBody SaveCardRequest reqDto){
+        return ResponseEntity.ok().body(cardService.saveCard(reqDto, listId, authUser));
     }
 
     @GetMapping("/{cardId}")
-    public ResponseEntity<GetCardResponse> getCard(@PathVariable Long cardId){
-        return ResponseEntity.ok().body(cardService.getCard(cardId));
+    public ResponseEntity<GetCardResponse> getCard(@AuthenticationPrincipal AuthUser authUser,
+                                                   @PathVariable Long listId,
+                                                   @PathVariable Long cardId){
+        return ResponseEntity.ok().body(cardService.getCard(authUser, listId, cardId));
     }
 
     @PutMapping("/{cardId}")
-    public ResponseEntity<ModifyCardResponse> modifyCard(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long cardId, @RequestBody ModifyCardRequest reqDto){
-        return ResponseEntity.ok().body(cardService.modifyCard(authUser, cardId, reqDto));
+    public ResponseEntity<ModifyCardResponse> modifyCard(@PathVariable Long listId,
+                                                         @AuthenticationPrincipal AuthUser authUser,
+                                                         @PathVariable Long cardId,
+                                                         @RequestBody ModifyCardRequest reqDto){
+        return ResponseEntity.ok().body(cardService.modifyCard(listId, authUser, cardId, reqDto));
     }
 
     @DeleteMapping("/{cardId}")
-    public void deleteCard(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long cardId){
-        cardService.deleteCard(authUser, cardId);
+    public void deleteCard(@AuthenticationPrincipal AuthUser authUser,
+                           @PathVariable Long listId,
+                           @PathVariable Long cardId){
+        cardService.deleteCard(listId, authUser, cardId);
     }
 
 

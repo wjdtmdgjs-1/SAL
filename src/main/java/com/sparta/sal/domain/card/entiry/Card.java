@@ -4,6 +4,7 @@ import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
 import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
 import com.sparta.sal.domain.card.dto.request.SaveCardRequest;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,10 @@ public class Card extends Timestamped {
     @OneToMany(mappedBy = "card", cascade = CascadeType.REMOVE)
     private  List<Assignee> assignees = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "list_id", nullable = false)
+    private com.sparta.sal.domain.list.entity.List list;
+
     public Card(SaveCardRequest reqDto){
         this.cardTitle = reqDto.getTitle();
         this.cardExplain= reqDto.getCardExplain();
@@ -46,6 +51,10 @@ public class Card extends Timestamped {
 
     public void deleteCard(){
         this.isDeleted=true;
+    }
+
+    public void addList(com.sparta.sal.domain.list.entity.List list){
+        this.list=list;
     }
 
 
