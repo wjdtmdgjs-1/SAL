@@ -1,7 +1,7 @@
 package com.sparta.sal.domain.assignee.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
-import com.sparta.sal.domain.card.entiry.Card;
+import com.sparta.sal.domain.card.entity.Card;
 import com.sparta.sal.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Getter;

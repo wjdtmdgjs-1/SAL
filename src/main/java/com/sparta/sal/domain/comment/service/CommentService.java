@@ -2,7 +2,7 @@ package com.sparta.sal.domain.comment.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
-import com.sparta.sal.domain.card.entiry.Card;
+import com.sparta.sal.domain.card.entity.Card;
 import com.sparta.sal.domain.card.repository.CardRepository;
 import com.sparta.sal.domain.comment.dto.request.ModifyCommentRequest;
 import com.sparta.sal.domain.comment.dto.request.SaveCommentRequest;
