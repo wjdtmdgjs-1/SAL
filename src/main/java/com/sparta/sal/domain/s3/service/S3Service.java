@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.sparta.sal.common.exception.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.boot.Metadata;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,11 @@ public class S3Service {
     public String uploadFile(MultipartFile file) throws IOException {
         // 파일 형식 체크
         String contentType = file.getContentType();
+
+        if(contentType==null) {
+            return null;
+        }
+
         if (!isValidFileType(contentType)) {
             throw new InvalidRequestException("지원되지 않는 파일 형식입니다.");
         }
@@ -31,7 +37,11 @@ public class S3Service {
         }
         // S3에 파일 업로드
         String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-        s3client.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), new ObjectMetadata()));
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setContentDisposition("inline"); // 파일을 열 수 있도록 설정
+        metadata.setContentType(contentType); // 파일 형식 설정
+        s3client.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
 
         return fileName;
     }

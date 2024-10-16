@@ -1,4 +1,4 @@
-package com.sparta.sal.domain.card.entiry;
+package com.sparta.sal.domain.card.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
@@ -39,7 +39,6 @@ public class Card extends Timestamped {
         this.deadline = deadline;
         this.attachment = filename;
     }
-
 
     public void modifyCard(ModifyCardRequest reqDto) {
         this.cardTitle = reqDto.getTitle();
