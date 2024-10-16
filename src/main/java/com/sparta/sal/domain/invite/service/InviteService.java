@@ -38,14 +38,14 @@ public class InviteService {
         //이미 같은 workspace에서 초대를 보냈는지, 이미 해당 workspace의 멤버인지를 체크한다.
         if(inviteRepository.checkDuplicate(inviteRequestDto.getWorkSpaceId(), user.getId()).isEmpty()
                 && memberRepository.checkDuplicate(inviteRequestDto.getWorkSpaceId(),user.getId()).isEmpty()){
-            Invite invite = new Invite(user,inviteRequestDto.getMemberRole(), inviteRequestDto.getWorkSpaceId());
+            Invite invite = new Invite(user, MemberRole.WORKSPACE, inviteRequestDto.getWorkSpaceId());
             savedInvite = inviteRepository.save(invite);
         }
         else {
             throw new InvalidRequestException("you can't invite that user");
         }
         return new InviteResponseDto(inviteRequestDto.getWorkSpaceId(),
-                inviteRequestDto.getMemberRole(),user.getId(),savedInvite.getId());
+                savedInvite.getMemberRole(),user.getId(),savedInvite.getId());
     }
     @Transactional
     public InviteResponseDto inviteMember(AuthUser authUser, InviteRequestDto inviteRequestDto) {

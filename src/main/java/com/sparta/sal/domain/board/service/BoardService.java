@@ -40,7 +40,6 @@ public class BoardService {
         WorkSpace workSpace = workSpaceRepository.findById(workSpaceId).orElseThrow(() -> new NullPointerException("no such workspace"));
         Board board = new Board(workSpace, boardRequestDto.getBoardTitle(), boardRequestDto.getBackground());
         boardRepository.save(board);
-        //  workSpace.addBoard(board);
         return new BoardResponseDto(workSpaceId, board.getId(), board.getBoardTitle(), board.getBackground());
     }
 
@@ -63,11 +62,6 @@ public class BoardService {
             List<Board> exlist = boardRepository.findByWorkSpace(w);
             boardList.addAll(exlist);
         }
-       /* List<BoardSimpleResponseDto> dtoss = new ArrayList<>();
-        for(Board b : boardList){
-            BoardSimpleResponseDto dto = new BoardSimpleResponseDto(b.getWorkSpace().getId(),b.getId());
-            dtoss.add(dto);
-        }*/
         return boardList.stream().map(board -> new BoardSimpleResponseDto(board.getWorkSpace().getId(), board.getId())).toList();
     }
 
@@ -107,6 +101,4 @@ public class BoardService {
     private Member findMemberWithUserIdAndWorkSpaceId(long userId, Long workSpaceId) {
         return memberRepository.findMemberWithUserIdAndWorkSpaceId(userId, workSpaceId).orElseThrow(() -> new NullPointerException("no such member"));
     }
-
-
 }

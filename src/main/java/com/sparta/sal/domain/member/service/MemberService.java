@@ -28,7 +28,7 @@ public class MemberService {
         Member member = findMember(memberId);
         WorkSpace workSpace = findWorkSpace(workSpaceId);
         //admin유저가 해당 workspace를 만든 유저인지 체크
-        if (authUser.getId().equals(workSpace.getMakerId())) {
+        if (!authUser.getId().equals(workSpace.getMakerId())) {
             throw new InvalidRequestException("you are not creater of workspace");
         }
         //해당 멤버가 해당 워크스페이스의 멤버인지 체크
