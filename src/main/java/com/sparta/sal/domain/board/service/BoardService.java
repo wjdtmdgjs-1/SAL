@@ -3,10 +3,14 @@ package com.sparta.sal.domain.board.service;
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
 import com.sparta.sal.domain.board.dto.request.BoardRequestDto;
+import com.sparta.sal.domain.board.dto.response.BoardDetailResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardSimpleResponseDto;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.board.repository.BoardRepository;
+import com.sparta.sal.domain.card.entiry.Card;
+import com.sparta.sal.domain.card.repository.CardRepository;
+import com.sparta.sal.domain.list.repository.ListRepository;
 import com.sparta.sal.domain.member.entity.Member;
 import com.sparta.sal.domain.member.enums.MemberRole;
 import com.sparta.sal.domain.member.repository.MemberRepository;
@@ -27,6 +31,8 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final WorkSpaceRepository workSpaceRepository;
+    private final ListRepository listRepository;
+    private final CardRepository cardRepository;
 
     @Transactional
     public BoardResponseDto postBoard(AuthUser authUser, long workSpaceId, BoardRequestDto boardRequestDto) {
@@ -51,7 +57,7 @@ public class BoardService {
         return new BoardResponseDto(workSpaceId, board.getId(), board.getBoardTitle(), board.getBackground());
     }
 
-    public List<BoardSimpleResponseDto> getBoard(AuthUser authUser) {
+    public List<BoardSimpleResponseDto> getBoardList(AuthUser authUser) {
         List<WorkSpace> list = memberRepository.findWorkSpaceIdByUserId(authUser.getId());
         List<Board> boardList = new ArrayList<>();
         for (WorkSpace w : list) {
@@ -66,6 +72,23 @@ public class BoardService {
         return boardList.stream().map(board -> new BoardSimpleResponseDto(board.getWorkSpace().getId(), board.getId())).toList();
     }
 
+    public List<BoardDetailResponseDto> getDetailBoardList(AuthUser authUser, long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(()->new NullPointerException("no such board"));
+        WorkSpace workSpace = board.getWorkSpace();
+        //로그인한 사람이 입력한 board의 워크스페이스의 멤버인지 확인
+        if(!workSpace.isMember(authUser)){
+            throw new InvalidRequestException("board is not belongs to your workspace");
+        }
+        //board의 모든 리스트를 불러온다
+        List<com.sparta.sal.domain.list.entity.List> listList = listRepository.findAllByBoard(board);
+        List<BoardDetailResponseDto> dtoList = new ArrayList<>();
+        //list안의 카드들의 정보를 꺼내와 저장해준다
+        for(com.sparta.sal.domain.list.entity.List l : listList){
+            BoardDetailResponseDto dto = new BoardDetailResponseDto(l.getId(),cardRepository.findAllByList(l));
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
     @Transactional
     public void deleteBoard(AuthUser authUser, long boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NullPointerException("no such board"));
@@ -85,5 +108,6 @@ public class BoardService {
     private Member findMemberWithUserIdAndWorkSpaceId(long userId, Long workSpaceId) {
         return memberRepository.findMemberWithUserIdAndWorkSpaceId(userId, workSpaceId).orElseThrow(() -> new NullPointerException("no such member"));
     }
+
 
 }

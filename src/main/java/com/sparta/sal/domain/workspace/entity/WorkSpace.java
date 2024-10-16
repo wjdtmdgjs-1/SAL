@@ -31,20 +31,9 @@ public class WorkSpace extends Timestamped {
     @OneToMany(mappedBy = "workSpace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> memberList = new ArrayList<>();
 
-    /*public void addMember(Member member) {
-        if (member != null) {
-            memberList.add(member);
-        }
-    }*/
 
     @OneToMany(mappedBy = "workSpace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
-
-    /*public void addBoard(Board board) {
-        if (board != null) {
-            boardList.add(board);
-        }
-    }*/
 
     public WorkSpace(Long makerId,String workSpaceTitle, String explain) {
         this.makerId=makerId;

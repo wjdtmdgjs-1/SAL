@@ -2,6 +2,7 @@ package com.sparta.sal.domain.board.controller;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.domain.board.dto.request.BoardRequestDto;
+import com.sparta.sal.domain.board.dto.response.BoardDetailResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardSimpleResponseDto;
 import com.sparta.sal.domain.board.service.BoardService;
@@ -34,9 +35,16 @@ public class BoardController {
     }
 
     @GetMapping("/boards")
-    public ResponseEntity<List<BoardSimpleResponseDto>> getBoard(@AuthenticationPrincipal AuthUser authUser){
-        return ResponseEntity.ok(boardService.getBoard(authUser));
+    public ResponseEntity<List<BoardSimpleResponseDto>> getBoardList(@AuthenticationPrincipal AuthUser authUser){
+        return ResponseEntity.ok(boardService.getBoardList(authUser));
     }
+
+    @GetMapping("/boards/{boardId}")
+    public ResponseEntity<List<BoardDetailResponseDto>> getDetailBoardList(@AuthenticationPrincipal AuthUser authUser,
+                                                                           @PathVariable long boardId){
+        return ResponseEntity.ok(boardService.getDetailBoardList(authUser,boardId));
+    }
+
 
     @DeleteMapping("/boards/{boardId}")
     public void deleteBoard(@AuthenticationPrincipal AuthUser authUser, @PathVariable long boardId){
