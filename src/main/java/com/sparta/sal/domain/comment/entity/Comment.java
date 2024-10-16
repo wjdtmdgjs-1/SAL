@@ -1,11 +1,10 @@
 package com.sparta.sal.domain.comment.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
-import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
 import com.sparta.sal.domain.card.entiry.Card;
 import com.sparta.sal.domain.comment.dto.request.ModifyCommentRequest;
 import com.sparta.sal.domain.comment.dto.request.SaveCommentRequest;
-import com.sparta.sal.domain.comment.dto.response.ModifyCommentResponse;
+import com.sparta.sal.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +25,10 @@ public class Comment extends Timestamped {
     @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Comment(SaveCommentRequest reqDto){
         this.commentContent=reqDto.getContents();
         this.emoji=reqDto.getEmoji();
@@ -40,7 +43,11 @@ public class Comment extends Timestamped {
         this.isDeleted=true;
     }
 
-    public void setCard(Card card){
+    public void addCard(Card card){
         this.card=card;
+    }
+
+    public void addUser(User user) {
+        this.user = user;
     }
 }
