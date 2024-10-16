@@ -155,6 +155,8 @@ public class CardService {
         Long workSpaceId = list.getBoard().getWorkSpace().getId();
         Member member = memberRepository.findByWorkSpace_IdAndUser_Id(workSpaceId, authUser.getId())
                 .orElseThrow(() -> new InvalidRequestException("해당 워크스페이스에 초대되지 않았습니다."));
+
+        return member;
     }
 
     public void viewCard(Long listId, Long cardId, AuthUser authUser) {
@@ -220,14 +222,6 @@ public class CardService {
             result.add(cardResponse);
         }
         return result;
-    }
-
-    private Member checkRole(List list, AuthUser authUser) {
-        Long workSpaceId = list.getBoard().getWorkSpace().getId();
-        Member member = memberRepository.findByWorkSpace_IdAndUser_Id(workSpaceId, authUser.getId())
-                .orElseThrow(() -> new InvalidRequestException("해당 워크스페이스에 초대되지 않았습니다."));
-
-        return member;
     }
 
     private String generateViewKey(Long listId, Long cardId) {

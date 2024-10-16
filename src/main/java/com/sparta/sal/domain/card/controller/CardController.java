@@ -6,6 +6,7 @@ import com.sparta.sal.domain.card.dto.response.GetCardResponse;
 import com.sparta.sal.domain.card.dto.response.ModifyCardResponse;
 import com.sparta.sal.domain.card.dto.response.SaveCardResponse;
 import com.sparta.sal.domain.card.service.CardService;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,7 +25,7 @@ public class CardController {
 
     @PostMapping("/{listId}/cards")
     public ResponseEntity<SaveCardResponse> saveCard(@AuthenticationPrincipal AuthUser authUser,
-                                                     @RequestParam("attachment") MultipartFile attachment,
+                                                     @RequestParam("attachment") @Nullable MultipartFile attachment,
                                                      @RequestParam("title") String title,
                                                      @RequestParam("cardExplain") String cardExplain,
                                                      @RequestParam("deadline") LocalDateTime deadline,
@@ -67,7 +68,7 @@ public class CardController {
         cardService.deleteAttachment(authUser, cardId);
     }
 
-    @GetMapping("/ranking")
+    @GetMapping("/{listId}/ranking")
     public ResponseEntity<List<GetCardResponse>> getTopRankedCards(@PathVariable Long listId,
                                                         @RequestParam(defaultValue = "10") int top) {
         List<GetCardResponse> topRankedCards = cardService.getTopRankedCards(listId, top);

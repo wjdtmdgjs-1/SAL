@@ -22,6 +22,11 @@ public class S3Service {
     public String uploadFile(MultipartFile file) throws IOException {
         // 파일 형식 체크
         String contentType = file.getContentType();
+
+        if(contentType==null) {
+            return null;
+        }
+
         if (!isValidFileType(contentType)) {
             throw new InvalidRequestException("지원되지 않는 파일 형식입니다.");
         }

@@ -8,7 +8,6 @@ import com.sparta.sal.domain.board.dto.response.BoardResponseDto;
 import com.sparta.sal.domain.board.dto.response.BoardSimpleResponseDto;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.board.repository.BoardRepository;
-import com.sparta.sal.domain.card.entiry.Card;
 import com.sparta.sal.domain.card.repository.CardRepository;
 import com.sparta.sal.domain.list.repository.ListRepository;
 import com.sparta.sal.domain.member.entity.Member;
