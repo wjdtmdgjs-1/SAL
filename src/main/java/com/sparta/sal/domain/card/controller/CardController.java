@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/lists")
@@ -63,5 +65,12 @@ public class CardController {
     @DeleteMapping("/cards/{cardId}/attachment")
     public void deleteAttachment(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long cardId) {
         cardService.deleteAttachment(authUser, cardId);
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<GetCardResponse>> getTopRankedCards(@PathVariable Long listId,
+                                                        @RequestParam(defaultValue = "10") int top) {
+        List<GetCardResponse> topRankedCards = cardService.getTopRankedCards(listId, top);
+        return ResponseEntity.ok(topRankedCards);
     }
 }

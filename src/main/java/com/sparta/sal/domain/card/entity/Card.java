@@ -1,4 +1,4 @@
-package com.sparta.sal.domain.card.entiry;
+package com.sparta.sal.domain.card.entity;
 
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
