@@ -1,6 +1,7 @@
 package com.sparta.sal.domain.list.service;
 
 import com.sparta.sal.common.dto.AuthUser;
+import com.sparta.sal.common.exception.InvalidRequestException;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.board.repository.BoardRepository;
 import com.sparta.sal.domain.list.dto.request.ListRequestDto;
@@ -9,6 +10,7 @@ import com.sparta.sal.domain.list.dto.response.ListResponseDto;
 import com.sparta.sal.domain.list.entity.List;
 import com.sparta.sal.domain.list.repository.ListRepository;
 import com.sparta.sal.domain.member.enums.MemberRole;
+import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,14 @@ public class ListService {
     private final BoardRepository boardRepository;
 
     @Transactional(readOnly = true)
-    public java.util.List<ListResponseDto> getLists(Long boardId) {
+    public java.util.List<ListResponseDto> getLists(Long boardId, AuthUser authUser) {
         Board board = findBoardById(boardId);
+
+        // 워크스페이스의 멤버인지 확인
+        WorkSpace workSpace = board.getWorkSpace();
+        if (!workSpace.isMember(authUser)) {
+            throw new InvalidRequestException("해당 워크스페이스의 멤버가 아닙니다.");
+        }
 
         return listRepository.findAllByBoard(board)
                 .stream()
@@ -34,11 +42,19 @@ public class ListService {
     }
 
     @Transactional(readOnly = true)
-    public ListResponseDto getList(Long boardId, Long listId) {
+    public ListResponseDto getList(Long boardId, Long listId, AuthUser authUser) {
         Board board = findBoardById(boardId);
+
+        // 워크스페이스의 멤버인지 확인
+        WorkSpace workSpace = board.getWorkSpace();
+        if (!workSpace.isMember(authUser)) {
+            throw new InvalidRequestException("해당 워크스페이스의 멤버가 아닙니다.");
+        }
+
         List list = findListById(listId);
         return ListResponseDto.of(list);
     }
+
 
     @Transactional
     public ListResponseDto createList(Long boardId, ListRequestDto listRequestDto, AuthUser authUser) {

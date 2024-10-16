@@ -21,15 +21,17 @@ public class ListController {
     private final ListService listService;
 
     @GetMapping("/board/{boardId}")
-    public ResponseEntity<List<ListResponseDto>> getLists(@PathVariable Long boardId) {
-        List<ListResponseDto> responseDtoList = listService.getLists(boardId);
+    public ResponseEntity<List<ListResponseDto>> getLists(@PathVariable Long boardId,
+                                                          @AuthenticationPrincipal AuthUser authUser) {
+        List<ListResponseDto> responseDtoList = listService.getLists(boardId, authUser);
         return ResponseEntity.ok(responseDtoList);
     }
 
     @GetMapping("/board/{boardId}/{listId}")
     public ResponseEntity<ListResponseDto> getList(@PathVariable Long boardId,
-                                                   @PathVariable Long listId) {
-        ListResponseDto responseDto = listService.getList(boardId, listId);
+                                                   @PathVariable Long listId,
+                                                   @AuthenticationPrincipal AuthUser authUser) {
+        ListResponseDto responseDto = listService.getList(boardId, listId, authUser);
         return ResponseEntity.ok(responseDto);
     }
 
