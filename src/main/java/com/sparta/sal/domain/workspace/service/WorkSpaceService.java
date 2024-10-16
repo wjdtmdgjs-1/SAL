@@ -55,7 +55,7 @@ public class WorkSpaceService {
     }
 
     @Transactional
-    public WorkSpaceTitleResponseDto updateWorkSpace(AuthUser authUser, Long workSpaceId, WorkSpaceFixRequestDto workSpaceFixRequestDto) {
+    public WorkSpaceTitleResponseDto updateWorkSpace(AuthUser authUser, long workSpaceId, WorkSpaceFixRequestDto workSpaceFixRequestDto) {
         //로그인한 사람이 해당 workspace에 memberRole workspace인지 확인
         checkWorkSpace(authUser.getId(),workSpaceId);
         WorkSpace workSpace = findWorkSpace(workSpaceId);
