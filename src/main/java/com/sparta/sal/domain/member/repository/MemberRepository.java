@@ -26,4 +26,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m WHERE m.workSpace.id = :workSpaceId AND m.user.id = :userId")
     Optional<Member> checkDuplicate(@Param("workSpaceId") long workSpaceId, @Param("userId") long userId);
+
+    Optional<Member> findByWorkSpace_IdAndUser_Id(long workSpaceId, long userId);
 }
