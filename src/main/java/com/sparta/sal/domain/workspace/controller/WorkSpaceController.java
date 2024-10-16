@@ -2,7 +2,10 @@ package com.sparta.sal.domain.workspace.controller;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.domain.user.enums.UserRole;
+import com.sparta.sal.domain.workspace.dto.request.PostMemberRequestDto;
+import com.sparta.sal.domain.workspace.dto.request.WorkSpaceFixRequestDto;
 import com.sparta.sal.domain.workspace.dto.request.WorkSpaceSaveRequestDto;
+import com.sparta.sal.domain.workspace.dto.response.PostMemberResponseDto;
 import com.sparta.sal.domain.workspace.dto.response.WorkSpaceResponseDto;
 import com.sparta.sal.domain.workspace.dto.response.WorkSpaceTitleResponseDto;
 import com.sparta.sal.domain.workspace.service.WorkSpaceService;
@@ -16,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1")
 public class WorkSpaceController {
     private final WorkSpaceService workSpaceService;
 
@@ -25,8 +29,20 @@ public class WorkSpaceController {
             return ResponseEntity.ok(workSpaceService.saveWorkSpace(authUser,workSpaceSaveRequestDto));
     }
 
-    @GetMapping("/workspaces")
-    public ResponseEntity<List<WorkSpaceResponseDto>> getWorkSpace(@RequestParam Long userid){
-        return ResponseEntity.ok(workSpaceService.getWorkSpace(userid));
+    @GetMapping("/workspaces/{userId}")
+    public ResponseEntity<List<WorkSpaceResponseDto>> getWorkSpaceList(@PathVariable long userId){
+        return ResponseEntity.ok(workSpaceService.getWorkSpaceList(userId));
+    }
+
+    @PutMapping("/workspaces/{workSpaceId}")
+    public ResponseEntity<WorkSpaceTitleResponseDto> updateWorkSpace(@AuthenticationPrincipal AuthUser authUser,
+                                                                  @PathVariable long workSpaceId,
+                                                                  @RequestBody WorkSpaceFixRequestDto workSpaceFixRequestDto){
+        return ResponseEntity.ok(workSpaceService.updateWorkSpace(authUser,workSpaceId,workSpaceFixRequestDto));
+    }
+
+    @DeleteMapping("/workspaces/{workSpaceId}")
+    public void deleteWorkSpace(@AuthenticationPrincipal AuthUser authUser, @PathVariable long workSpaceId){
+        workSpaceService.deleteWorkSpace(authUser,workSpaceId);
     }
 }
