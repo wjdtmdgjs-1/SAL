@@ -17,7 +17,6 @@ import com.sparta.sal.domain.user.entity.User;
 import com.sparta.sal.domain.user.enums.UserRole;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import com.sparta.sal.domain.workspace.repository.WorkSpaceRepository;
-import jakarta.validation.constraints.Null;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import software.amazon.awssdk.regions.internal.util.Ec2MetadataConfigProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,118 +56,123 @@ public class BoardServiceTest {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
 
-        NullPointerException exception = assertThrows(NullPointerException.class,()->boardService.postBoard(authUser,1L,boardRequestDto));
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> boardService.postBoard(authUser, 1L, boardRequestDto));
 
-        assertEquals("no such member",exception.getMessage());
+        assertEquals("no such member", exception.getMessage());
     }
+
     @Test
-    public void postBoard_checkReadOnly_Fail(){
+    public void postBoard_checkReadOnly_Fail() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
         WorkSpace workSpace = new WorkSpace();
         User user = new User();
-        Member member = new Member(user,workSpace, MemberRole.READ_ONLY);
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        Member member = new Member(user, workSpace, MemberRole.READ_ONLY);
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
 
-        InvalidRequestException exception = assertThrows(InvalidRequestException.class,()->boardService.postBoard(authUser,1L,boardRequestDto));
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> boardService.postBoard(authUser, 1L, boardRequestDto));
 
-        assertEquals("you can readOnly",exception.getMessage());
+        assertEquals("you can readOnly", exception.getMessage());
     }
+
     @Test
-    public void postBoard_workspace_찾기실패(){
+    public void postBoard_workspace_찾기실패() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
         WorkSpace workSpace = new WorkSpace();
         User user = new User();
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
 
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.empty());
 
-        NullPointerException exception = assertThrows(NullPointerException.class,()->boardService.postBoard(authUser,1L,boardRequestDto));
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> boardService.postBoard(authUser, 1L, boardRequestDto));
 
-        assertEquals("no such workspace",exception.getMessage());
+        assertEquals("no such workspace", exception.getMessage());
     }
+
     @Test
-    public void postBoard성공(){
+    public void postBoard성공() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
         WorkSpace workSpace = new WorkSpace();
         User user = new User();
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
 
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
 
-        BoardResponseDto dto = boardService.postBoard(authUser,1L,boardRequestDto);
+        BoardResponseDto dto = boardService.postBoard(authUser, 1L, boardRequestDto);
 
         assertNotNull(dto);
     }
 
     @Test
-    public void updateBoard_findboardfail(){
+    public void updateBoard_findboardfail() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
-        WorkSpace workSpace = new WorkSpace(1L,"title","explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        User user = User.from("a@a.com","password", UserRole.valueOf(UserRole.Authority.ADMIN));
-        ReflectionTestUtils.setField(user,"id",1L);
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
-        Board board = new Board(workSpace,"title","background");
+        WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
+        Board board = new Board(workSpace, "title", "background");
 
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
         given(boardRepository.findById(anyLong())).willReturn(Optional.empty());
 
-        NullPointerException exception = assertThrows(NullPointerException.class,()->boardService.updateBoard(authUser,1L,1L,boardRequestDto));
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> boardService.updateBoard(authUser, 1L, 1L, boardRequestDto));
 
-        assertEquals("no such board",exception.getMessage());
+        assertEquals("no such board", exception.getMessage());
     }
+
     @Test
-    public void updateBoard_boardCheckFail(){
+    public void updateBoard_boardCheckFail() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
-        WorkSpace workSpace = new WorkSpace(1L,"title","explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        User user = User.from("a@a.com","password", UserRole.valueOf(UserRole.Authority.ADMIN));
-        ReflectionTestUtils.setField(user,"id",1L);
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
-        Board board = new Board(workSpace,"title","background");
+        WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
+        Board board = new Board(workSpace, "title", "background");
 
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
         given(boardRepository.findById(anyLong())).willReturn(Optional.of(board));
 
-        InvalidRequestException exception = assertThrows(InvalidRequestException.class,()->boardService.updateBoard(authUser,2L,1L,boardRequestDto));
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> boardService.updateBoard(authUser, 2L, 1L, boardRequestDto));
 
-        assertEquals("that board is not belongs to your workspace",exception.getMessage());
+        assertEquals("that board is not belongs to your workspace", exception.getMessage());
     }
+
     @Test
-    public void updateBoard_성공(){
+    public void updateBoard_성공() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         BoardRequestDto boardRequestDto = new BoardRequestDto();
-        ReflectionTestUtils.setField(boardRequestDto,"boardTitle","title");
-        ReflectionTestUtils.setField(boardRequestDto,"background","background");
-        WorkSpace workSpace = new WorkSpace(1L,"title","explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        User user = User.from("a@a.com","password", UserRole.valueOf(UserRole.Authority.ADMIN));
-        ReflectionTestUtils.setField(user,"id",1L);
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
-        Board board = new Board(workSpace,"title","background");
+        ReflectionTestUtils.setField(boardRequestDto, "boardTitle", "title");
+        ReflectionTestUtils.setField(boardRequestDto, "background", "background");
+        WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
+        Board board = new Board(workSpace, "title", "background");
 
-        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findMemberWithUserIdAndWorkSpaceId(anyLong(), anyLong())).willReturn(Optional.of(member));
         given(boardRepository.findById(anyLong())).willReturn(Optional.of(board));
 
-        BoardResponseDto dto = boardService.updateBoard(authUser,1L,1L,boardRequestDto);
+        BoardResponseDto dto = boardService.updateBoard(authUser, 1L, 1L, boardRequestDto);
 
         assertNotNull(dto);
     }
 
     @Test
-    public void getboardList_success(){
+    public void getboardList_success() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
-        WorkSpace workSpace = new WorkSpace(1L,"title","explain");
+        WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
         List<WorkSpace> workSpaceList = new ArrayList<>();
         workSpaceList.add(workSpace);
-        Board board = new Board(workSpace,"title","background");
+        Board board = new Board(workSpace, "title", "background");
         List<Board> boardList = new ArrayList<>();
         boardList.add(board);
 
@@ -180,29 +183,31 @@ public class BoardServiceTest {
 
         assertNotNull(dtoList);
     }
+
     @Test
-    public void getDetialBoardList_findboardfail(){
+    public void getDetialBoardList_findboardfail() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
-        WorkSpace workSpace = new WorkSpace(1L,"title","explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        User user = User.from("a@a.com","password", UserRole.valueOf(UserRole.Authority.ADMIN));
-        ReflectionTestUtils.setField(user,"id",1L);
-        Member member = new Member(user,workSpace, MemberRole.BOARD);
-        Board board = new Board(workSpace,"title","background");
-        ReflectionTestUtils.setField(board,"id",1L);
+        WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Member member = new Member(user, workSpace, MemberRole.BOARD);
+        Board board = new Board(workSpace, "title", "background");
+        ReflectionTestUtils.setField(board, "id", 1L);
 
         given(boardRepository.findById(anyLong())).willReturn(Optional.empty());
 
         NullPointerException exception = assertThrows(NullPointerException.class,
-                ()->boardService.getDetailBoardList(authUser,1L));
+                () -> boardService.getDetailBoardList(authUser, 1L));
 
-        assertEquals("no such board",exception.getMessage());
+        assertEquals("no such board", exception.getMessage());
     }
+
     @Test
     public void getDetailBoardList_isMember() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
         WorkSpace workSpace = Mockito.mock(WorkSpace.class); // WorkSpace를 모의 객체로 생성
-        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN));
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
         Board board = new Board(workSpace, "title", "background");
         long boardId = 1L;
 
@@ -215,6 +220,7 @@ public class BoardServiceTest {
 
         assertEquals("board is not belongs to your workspace", exception.getMessage());
     }
+
     @Test
     public void getDetailBoardList_success() {
         AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
@@ -237,12 +243,13 @@ public class BoardServiceTest {
         assertEquals(1, result.size());
         assertEquals(mockList.getId(), result.get(0).getListId());
     }
+
     @Test
     public void deleteBoard_readonly() {
         long boardId = 1L;
-        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN));
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
         WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
         Board board = new Board(workSpace, "Board Title", "Background");
 
         given(boardRepository.findById(boardId)).willReturn(Optional.of(board));
@@ -256,12 +263,13 @@ public class BoardServiceTest {
 
         assertEquals("you can readonly", exception.getMessage());
     }
+
     @Test
     public void deleteBoard_success() {
         long boardId = 1L;
-        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN));
+        User user = User.from("a@a.com", "password", UserRole.valueOf(UserRole.Authority.ADMIN), "slackId");
         WorkSpace workSpace = new WorkSpace(1L, "title", "explain");
-        ReflectionTestUtils.setField(workSpace,"id",1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
         Board board = new Board(workSpace, "Board Title", "Background");
 
         given(boardRepository.findById(boardId)).willReturn(Optional.of(board));
@@ -271,7 +279,7 @@ public class BoardServiceTest {
 
         boardService.deleteBoard(AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN), boardId);
 
-       verify(boardRepository,times(1)).delete(board);
+        verify(boardRepository, times(1)).delete(board);
     }
 }
 

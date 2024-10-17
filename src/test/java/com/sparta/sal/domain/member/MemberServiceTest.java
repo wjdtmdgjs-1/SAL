@@ -38,112 +38,116 @@ public class MemberServiceTest {
     private MemberService memberService;
 
     @Test
-    public void changeWorkSpace_createrCheck(){
-        Long memberId =1L;
+    public void changeWorkSpace_createrCheck() {
+        Long memberId = 1L;
         Long workSpaceId = 1L;
         MemberRequestDto memberRequestDto = new MemberRequestDto();
         Member member = new Member();
 
-        AuthUser authUser = AuthUser.from(2L,"a@a.com", UserRole.ROLE_ADMIN);
-        User user = User.from("aa@a.com","password",UserRole.ROLE_USER);
+        AuthUser authUser = AuthUser.from(2L, "a@a.com", UserRole.ROLE_ADMIN);
+        User user = User.from("aa@a.com", "password", UserRole.ROLE_USER, "slackId");
         WorkSpace workSpace = new WorkSpace();
 
-        ReflectionTestUtils.setField(workSpace,"makerId",1L);
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        ReflectionTestUtils.setField(user,"id",1L);
-        ReflectionTestUtils.setField(member,"workSpace",workSpace);
-        ReflectionTestUtils.setField(member,"user",user);
-        ReflectionTestUtils.setField(member,"memberRole", MemberRole.WORKSPACE);
-        ReflectionTestUtils.setField(memberRequestDto,"memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(workSpace, "makerId", 1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(memberRequestDto, "memberRole", MemberRole.WORKSPACE);
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
 
-        Exception exception = assertThrows(InvalidRequestException.class,()->memberService.changeWorkSpace(authUser,memberId,workSpaceId,memberRequestDto));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> memberService.changeWorkSpace(authUser, memberId, workSpaceId, memberRequestDto));
 
-        assertEquals("you are not creater of workspace",exception.getMessage());
+        assertEquals("you are not creater of workspace", exception.getMessage());
     }
+
     @Test
-    public void changeWorkSpace_memberCheck(){
-        Long memberId =1L;
+    public void changeWorkSpace_memberCheck() {
+        Long memberId = 1L;
         Long workSpaceId = 2L;
         MemberRequestDto memberRequestDto = new MemberRequestDto();
         Member member = new Member();
 
-        AuthUser authUser = AuthUser.from(1L,"a@a.com", UserRole.ROLE_ADMIN);
-        User user = User.from("aa@a.com","password",UserRole.ROLE_USER);
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
+        User user = User.from("aa@a.com", "password", UserRole.ROLE_USER, "slackId");
         WorkSpace workSpace = new WorkSpace();
 
-        ReflectionTestUtils.setField(workSpace,"makerId",1L);
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        ReflectionTestUtils.setField(user,"id",1L);
-        ReflectionTestUtils.setField(member,"workSpace",workSpace);
-        ReflectionTestUtils.setField(member,"user",user);
-        ReflectionTestUtils.setField(member,"memberRole", MemberRole.WORKSPACE);
-        ReflectionTestUtils.setField(memberRequestDto,"memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(workSpace, "makerId", 1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(memberRequestDto, "memberRole", MemberRole.WORKSPACE);
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
 
-        Exception exception = assertThrows(InvalidRequestException.class,()->memberService.changeWorkSpace(authUser,memberId,workSpaceId,memberRequestDto));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> memberService.changeWorkSpace(authUser, memberId, workSpaceId, memberRequestDto));
 
-        assertEquals("member not belongs to workspace",exception.getMessage());
+        assertEquals("member not belongs to workspace", exception.getMessage());
     }
+
     @Test
-    public void changeWorkSpace_workspace(){
-        Long memberId =1L;
+    public void changeWorkSpace_workspace() {
+        Long memberId = 1L;
         Long workSpaceId = 1L;
         MemberRequestDto memberRequestDto = new MemberRequestDto();
         Member member = new Member();
 
-        AuthUser authUser = AuthUser.from(1L,"a@a.com", UserRole.ROLE_ADMIN);
-        User user = User.from("aa@a.com","password",UserRole.ROLE_USER);
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
+        User user = User.from("aa@a.com", "password", UserRole.ROLE_USER, "slackId");
         WorkSpace workSpace = new WorkSpace();
 
-        ReflectionTestUtils.setField(workSpace,"makerId",1L);
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        ReflectionTestUtils.setField(user,"id",1L);
-        ReflectionTestUtils.setField(member,"workSpace",workSpace);
-        ReflectionTestUtils.setField(member,"user",user);
-        ReflectionTestUtils.setField(member,"memberRole", MemberRole.BOARD);
-        ReflectionTestUtils.setField(memberRequestDto,"memberRole", MemberRole.BOARD);
+        ReflectionTestUtils.setField(workSpace, "makerId", 1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.BOARD);
+        ReflectionTestUtils.setField(memberRequestDto, "memberRole", MemberRole.BOARD);
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
 
-        Exception exception = assertThrows(InvalidRequestException.class,()->memberService.changeWorkSpace(authUser,memberId,workSpaceId,memberRequestDto));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> memberService.changeWorkSpace(authUser, memberId, workSpaceId, memberRequestDto));
 
-        assertEquals("not allowed",exception.getMessage());
+        assertEquals("not allowed", exception.getMessage());
     }
+
     @Test
-    public void changeWorkSpace_success(){
-        Long memberId =1L;
+    public void changeWorkSpace_success() {
+        Long memberId = 1L;
         Long workSpaceId = 1L;
         MemberRequestDto memberRequestDto = new MemberRequestDto();
         Member member = new Member();
 
-        AuthUser authUser = AuthUser.from(1L,"a@a.com", UserRole.ROLE_ADMIN);
-        User user = User.from("aa@a.com","password",UserRole.ROLE_USER);
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_ADMIN);
+        User user = User.from("aa@a.com", "password", UserRole.ROLE_USER, "slackId");
         WorkSpace workSpace = new WorkSpace();
 
-        ReflectionTestUtils.setField(workSpace,"makerId",1L);
-        ReflectionTestUtils.setField(workSpace,"id",1L);
-        ReflectionTestUtils.setField(user,"id",1L);
-        ReflectionTestUtils.setField(member,"workSpace",workSpace);
-        ReflectionTestUtils.setField(member,"user",user);
-        ReflectionTestUtils.setField(member,"memberRole", MemberRole.WORKSPACE);
-        ReflectionTestUtils.setField(memberRequestDto,"memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(workSpace, "makerId", 1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(memberRequestDto, "memberRole", MemberRole.WORKSPACE);
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
 
-        MemberResponseDto dto = memberService.changeWorkSpace(authUser,memberId,workSpaceId,memberRequestDto);
+        MemberResponseDto dto = memberService.changeWorkSpace(authUser, memberId, workSpaceId, memberRequestDto);
 
         assertNotNull(dto);
     }
+
     @Test
     public void changeMemberRole() {
-        User user = User.from("a@a.com","password",UserRole.ROLE_USER);
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         Member member = new Member();
@@ -164,7 +168,7 @@ public class MemberServiceTest {
         memberList.add(workspaceMember);
 
         given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
-        given(memberRepository.findByUserIdAndMemberRole(anyLong(),any())).willReturn(memberList);
+        given(memberRepository.findByUserIdAndMemberRole(anyLong(), any())).willReturn(memberList);
 
         MemberResponseDto response = memberService.changeMemberRole(authUser, memberId, memberRequestDto);
 

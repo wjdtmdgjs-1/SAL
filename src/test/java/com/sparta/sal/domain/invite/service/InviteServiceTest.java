@@ -2,6 +2,7 @@ package com.sparta.sal.domain.invite.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.domain.invite.dto.request.InviteRequestDto;
 import com.sparta.sal.domain.invite.dto.response.InviteAcceptResponseDto;
 import com.sparta.sal.domain.invite.dto.response.InviteResponseDto;
@@ -43,73 +44,77 @@ public class InviteServiceTest {
     private WorkSpaceRepository workSpaceRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private AlertService alertService;
     @InjectMocks
     private InviteService inviteService;
 
     @Test
-    public void inviteWorkSpaceMember_userNotFound(){
+    public void inviteWorkSpaceMember_userNotFound() {
         InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"userId",1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
         given(userRepository.findById(anyLong())).willReturn(Optional.empty());
 
         Exception exception = assertThrows(NullPointerException.class,
-                ()-> inviteService.inviteWorkSpaceMember(dto));
+                () -> inviteService.inviteWorkSpaceMember(dto));
 
-        assertEquals("no such user",exception.getMessage());
+        assertEquals("no such user", exception.getMessage());
     }
 
     @Test
-    public void inviteWorkSpaceMember_chekcduplicate_invite(){
+    public void inviteWorkSpaceMember_chekcduplicate_invite() {
         InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"userId",1L);
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
 
-        User user = User.from("a@a.com","password", UserRole.ROLE_USER);
-        ReflectionTestUtils.setField(user,"id",1L);
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
 
         Invite invite = new Invite();
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(inviteRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.of(invite));
+        given(inviteRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.of(invite));
 
-        Exception exception = assertThrows(InvalidRequestException.class,()-> inviteService.inviteWorkSpaceMember(dto));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> inviteService.inviteWorkSpaceMember(dto));
 
-        assertEquals("you can't invite that user",exception.getMessage());
+        assertEquals("you can't invite that user", exception.getMessage());
     }
-    @Test
-    public void inviteWorkSpaceMember_chekcduplicate_member(){
-        InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"userId",1L);
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
 
-        User user = User.from("a@a.com","password", UserRole.ROLE_USER);
-        ReflectionTestUtils.setField(user,"id",1L);
+    @Test
+    public void inviteWorkSpaceMember_chekcduplicate_member() {
+        InviteRequestDto dto = new InviteRequestDto();
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
+
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
 
         Invite invite = new Invite();
         Member member = new Member();
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(inviteRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.empty());
-        given(memberRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.of(member));
+        given(inviteRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(memberRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.of(member));
 
-        Exception exception = assertThrows(InvalidRequestException.class,()-> inviteService.inviteWorkSpaceMember(dto));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> inviteService.inviteWorkSpaceMember(dto));
 
-        assertEquals("you can't invite that user",exception.getMessage());
+        assertEquals("you can't invite that user", exception.getMessage());
     }
-    @Test
-    public void inviteWorkSpaceMember_success(){
-        InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"userId",1L);
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
 
-        User user = User.from("a@a.com","password", UserRole.ROLE_USER);
-        ReflectionTestUtils.setField(user,"id",1L);
+    @Test
+    public void inviteWorkSpaceMember_success() {
+        InviteRequestDto dto = new InviteRequestDto();
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
+
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
 
         Invite invite = new Invite();
-        ReflectionTestUtils.setField(invite,"id",1L);
+        ReflectionTestUtils.setField(invite, "id", 1L);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(inviteRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.empty());
-        given(memberRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.empty());
+        given(inviteRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(memberRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.empty());
         given(inviteRepository.save(any())).willReturn(invite);
 
         InviteResponseDto responseDto = inviteService.inviteWorkSpaceMember(dto);
@@ -118,72 +123,74 @@ public class InviteServiceTest {
     }
 
     @Test
-    public void inviteMember_checkAuthuser(){
-        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
+    public void inviteMember_checkAuthuser() {
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
         InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
 
-        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(),any(),anyLong())).willReturn(Optional.empty());
+        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(), any(), anyLong())).willReturn(Optional.empty());
 
-        Exception exception = assertThrows(NullPointerException.class,()->inviteService.inviteMember(authUser,dto));
+        Exception exception = assertThrows(NullPointerException.class, () -> inviteService.inviteMember(authUser, dto));
 
-        assertEquals("you are not the workspace of that workspace",exception.getMessage());
+        assertEquals("you are not the workspace of that workspace", exception.getMessage());
     }
+
     @Test
-    public void inviteMember_workspace(){
-        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
+    public void inviteMember_workspace() {
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
 
         InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
-        ReflectionTestUtils.setField(dto,"userId",1L);
-        ReflectionTestUtils.setField(dto,"memberRole",MemberRole.WORKSPACE);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "memberRole", MemberRole.WORKSPACE);
 
         Member member = new Member();
-        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(),any(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(), any(), anyLong())).willReturn(Optional.of(member));
 
         User user = new User();
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
         Exception exception = assertThrows(InvalidRequestException.class,
-                ()->inviteService.inviteMember(authUser,dto));
+                () -> inviteService.inviteMember(authUser, dto));
 
-        assertEquals("you can't invite workspace role",exception.getMessage());
+        assertEquals("you can't invite workspace role", exception.getMessage());
     }
 
     @Test
-    public void inviteMember_success(){
-        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
+    public void inviteMember_success() {
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
 
         InviteRequestDto dto = new InviteRequestDto();
-        ReflectionTestUtils.setField(dto,"workSpaceId",1L);
-        ReflectionTestUtils.setField(dto,"userId",1L);
-        ReflectionTestUtils.setField(dto,"memberRole",MemberRole.BOARD);
+        ReflectionTestUtils.setField(dto, "workSpaceId", 1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "memberRole", MemberRole.BOARD);
 
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace,"id",1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
         Member member = new Member();
-        ReflectionTestUtils.setField(member,"workSpace",workSpace);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
 
-        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(),any(),anyLong())).willReturn(Optional.of(member));
+        given(memberRepository.findByUserIdAndMemberRoleAndWorkSpaceId(anyLong(), any(), anyLong())).willReturn(Optional.of(member));
 
         User user = new User();
-        ReflectionTestUtils.setField(user,"id",1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
         Invite invite = new Invite();
-        ReflectionTestUtils.setField(invite,"id",1L);
+        ReflectionTestUtils.setField(invite, "id", 1L);
 
-        given(inviteRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.empty());
-        given(memberRepository.checkDuplicate(anyLong(),anyLong())).willReturn(Optional.empty());
+        given(inviteRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(memberRepository.checkDuplicate(anyLong(), anyLong())).willReturn(Optional.empty());
         given(inviteRepository.save(any())).willReturn(invite);
 
-        InviteResponseDto responseDto = inviteService.inviteMember(authUser,dto);
+        InviteResponseDto responseDto = inviteService.inviteMember(authUser, dto);
 
         assertNotNull(responseDto);
     }
+
     @Test
-    public void getInviteList_success(){
-        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
+    public void getInviteList_success() {
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
         List<Invite> inviteList = new ArrayList<>();
 
         given(inviteRepository.findByUserId(anyLong())).willReturn(inviteList);
@@ -192,56 +199,60 @@ public class InviteServiceTest {
 
         assertNotNull(responseDto);
     }
-    @Test
-    public void acceptInvite_wrongUser(){
-        AuthUser authUser = AuthUser.from(2L,"a@a.com",UserRole.ROLE_USER);
-        User user = User.from("a@a.com","password",UserRole.ROLE_USER);
-        ReflectionTestUtils.setField(user,"id",1L);
 
-        long inviteId=1L;
+    @Test
+    public void acceptInvite_wrongUser() {
+        AuthUser authUser = AuthUser.from(2L, "a@a.com", UserRole.ROLE_USER);
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        long inviteId = 1L;
         Invite invite = new Invite();
-        ReflectionTestUtils.setField(invite,"user",user);
-        ReflectionTestUtils.setField(invite,"workSpaceId",1L);
-        ReflectionTestUtils.setField(invite,"id",1L);
+        ReflectionTestUtils.setField(invite, "user", user);
+        ReflectionTestUtils.setField(invite, "workSpaceId", 1L);
+        ReflectionTestUtils.setField(invite, "id", 1L);
 
         WorkSpace workSpace = new WorkSpace();
 
         given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
+        alertService.inviteSlackChannel(workSpace.getSlackChannel(), user.getSlackId());
 
-        Exception exception = assertThrows(InvalidRequestException.class,()->inviteService.acceptInvite(authUser,inviteId));
+        Exception exception = assertThrows(InvalidRequestException.class, () -> inviteService.acceptInvite(authUser, inviteId));
 
         assertEquals("you are not the owner of the invite", exception.getMessage());
     }
 
     @Test
-    public void acceptInvite_success(){
-        AuthUser authUser = AuthUser.from(1L,"a@a.com",UserRole.ROLE_USER);
-        User user = User.from("a@a.com","password",UserRole.ROLE_USER);
-        ReflectionTestUtils.setField(user,"id",1L);
+    public void acceptInvite_success() {
+        AuthUser authUser = AuthUser.from(1L, "a@a.com", UserRole.ROLE_USER);
+        User user = User.from("a@a.com", "password", UserRole.ROLE_USER, "slackId");
+        ReflectionTestUtils.setField(user, "id", 1L);
 
-        long inviteId=1L;
+        long inviteId = 1L;
         Invite invite = new Invite();
-        ReflectionTestUtils.setField(invite,"user",user);
-        ReflectionTestUtils.setField(invite,"workSpaceId",1L);
-        ReflectionTestUtils.setField(invite,"id",1L);
-        ReflectionTestUtils.setField(invite,"memberRole",MemberRole.BOARD);
+        ReflectionTestUtils.setField(invite, "user", user);
+        ReflectionTestUtils.setField(invite, "workSpaceId", 1L);
+        ReflectionTestUtils.setField(invite, "id", 1L);
+        ReflectionTestUtils.setField(invite, "memberRole", MemberRole.BOARD);
 
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace,"id",1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
 
         Member member = new Member();
-        ReflectionTestUtils.setField(member,"id",1L);
-        ReflectionTestUtils.setField(member,"memberRole",MemberRole.BOARD);
+        ReflectionTestUtils.setField(member, "id", 1L);
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.BOARD);
 
         given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
         given(workSpaceRepository.findById(anyLong())).willReturn(Optional.of(workSpace));
+        alertService.inviteSlackChannel(workSpace.getSlackChannel(), user.getSlackId());
 
-        InviteAcceptResponseDto dto = inviteService.acceptInvite(authUser,inviteId);
+        InviteAcceptResponseDto dto = inviteService.acceptInvite(authUser, inviteId);
 
         assertNotNull(dto);
-        verify(inviteRepository,times(1)).delete(invite);
+        verify(inviteRepository, times(1)).delete(invite);
     }
+
     @Test
     public void refuseInvite() {
         long inviteId = 1L;
@@ -253,8 +264,8 @@ public class InviteServiceTest {
 
         given(inviteRepository.findById(anyLong())).willReturn(Optional.of(invite));
 
-        inviteService.refuseInvite(authUser,inviteId);
+        inviteService.refuseInvite(authUser, inviteId);
 
-        verify(inviteRepository,times(1)).delete(invite);
+        verify(inviteRepository, times(1)).delete(invite);
     }
 }

@@ -2,6 +2,8 @@ package com.sparta.sal.domain.card.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
+import com.sparta.sal.common.service.S3Service;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.board.repository.BoardRepository;
 import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
@@ -15,7 +17,8 @@ import com.sparta.sal.domain.list.repository.ListRepository;
 import com.sparta.sal.domain.member.entity.Member;
 import com.sparta.sal.domain.member.enums.MemberRole;
 import com.sparta.sal.domain.member.repository.MemberRepository;
-import com.sparta.sal.domain.s3.service.S3Service;
+import com.sparta.sal.domain.user.entity.User;
+import com.sparta.sal.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -46,10 +48,12 @@ public class CardService {
     private final S3Service s3Service;
     private final RedisTemplate<String, Object> redisTemplate;
     private final BoardRepository boardRepository;
+    private final AlertService alertService;
+    private final UserService userService;
 
     @Transactional
     public SaveCardResponse saveCard(MultipartFile attachment, String title, String cardExplain, LocalDateTime deadline, Long listId, AuthUser authUser) {
-
+        User user = userService.isValidUser(authUser.getId());
         List list = listRepository.findById(listId).orElseThrow(() -> new InvalidRequestException("리스트를 찾을 수 없습니다."));
         Member member = checkRole(list, authUser); // 권한 확인
 
@@ -59,10 +63,14 @@ public class CardService {
 
         try {
             String filename = s3Service.uploadFile(attachment);
-            Card card = new Card(title, cardExplain, deadline, filename);
+            Card card = new Card(title, cardExplain, deadline, filename, user);
 
             card.addList(list);
             Card saveCard = cardRepository.save(card);
+
+            alertService.sendMessage(member.getWorkSpace().getSlackChannel()
+                    , member.getUser().getName() + "님이 새로운 카드 " + saveCard.getCardTitle() + "를 작성하셨습니다.");
+
             return new SaveCardResponse(saveCard);
 
         } catch (IOException e) {
@@ -109,6 +117,10 @@ public class CardService {
         }
 
         card.modifyCard(reqDto);
+
+        alertService.sendMessage(member.getWorkSpace().getSlackChannel()
+                , member.getUser().getName() + "님이 카드 " + card.getCardTitle() + "를 수정하셨습니다.");
+
         return new ModifyCardResponse(cardRepository.save(card));
     }
 
@@ -137,6 +149,9 @@ public class CardService {
 
         card.deleteCard();
         cardRepository.save(card);
+
+        alertService.sendMessage(member.getWorkSpace().getSlackChannel()
+                , member.getUser().getName() + "님이 카드 " + card.getCardTitle() + "를 삭제하셨습니다.");
     }
 
     /**
@@ -184,6 +199,9 @@ public class CardService {
         }
         s3Service.deleteFile(card.getAttachment());
         card.deleteAttachment();
+
+        alertService.sendMessage(member.getWorkSpace().getSlackChannel()
+                , member.getUser().getName() + "님이 카드 " + card.getCardTitle() + "를 수정하셨습니다.");
     }
 
     // 권한 확인

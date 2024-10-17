@@ -1,4 +1,4 @@
-package com.sparta.sal.domain.s3.service;
+package com.sparta.sal.common.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;

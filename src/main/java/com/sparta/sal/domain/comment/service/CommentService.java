@@ -2,6 +2,7 @@ package com.sparta.sal.domain.comment.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.domain.card.entity.Card;
 import com.sparta.sal.domain.card.repository.CardRepository;
 import com.sparta.sal.domain.comment.dto.request.ModifyCommentRequest;
@@ -30,7 +31,7 @@ public class CommentService {
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
-
+    private final AlertService alertService;
 
     @Transactional
     public SaveCommentResponse saveComment(AuthUser authUser, SaveCommentRequest reqDto, Long cardId) {
@@ -47,6 +48,10 @@ public class CommentService {
         comment.addUser(user);
 
         Comment savedComment = commentRepository.save(comment);
+
+        alertService.sendMessage(card.getUser().getSlackId()
+                , user.getName() + "님이 카드 " + card.getCardTitle() + "에 댓글을 작성하셨습니다.");
+
         return new SaveCommentResponse(savedComment);
     }
 
@@ -72,6 +77,10 @@ public class CommentService {
         }
 
         comment.ModifyComment(reqDto);
+
+        alertService.sendMessage(card.getUser().getSlackId()
+                , comment.getUser().getName() + "님이 카드 " + card.getCardTitle() + "에 댓글을 수정하셨습니다.");
+
         return new ModifyCommentResponse(commentRepository.save(comment));
     }
 
@@ -84,6 +93,9 @@ public class CommentService {
 
         comment.deleteComment();
         commentRepository.save(comment);
+
+        alertService.sendMessage(comment.getCard().getUser().getSlackId()
+                , comment.getUser().getName() + "님이 카드 " + comment.getCard().getCardTitle() + "에 댓글을 삭제하셨습니다.");
     }
 
     private Member checkRole(Card card, AuthUser authUser) {

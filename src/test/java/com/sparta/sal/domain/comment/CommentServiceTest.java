@@ -3,6 +3,7 @@ package com.sparta.sal.domain.comment;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.domain.board.entity.Board;
 import com.sparta.sal.domain.card.entity.Card;
 import com.sparta.sal.domain.card.repository.CardRepository;
@@ -54,6 +55,9 @@ public class CommentServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private AlertService alertService;
+
     @Test
     void saveComment_success() {
         Long cardId = 1L;
@@ -85,6 +89,7 @@ public class CommentServiceTest {
         // User 초기화
         User user = new User();
         ReflectionTestUtils.setField(user, "id", userId);
+        ReflectionTestUtils.setField(user, "slackId", "test");
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
         // Member 초기화
@@ -97,6 +102,9 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(savedComment, "id", 1L);
         ReflectionTestUtils.setField(savedComment, "commentContent", "Test comment");
         given(commentRepository.save(any(Comment.class))).willReturn(savedComment);
+
+        ReflectionTestUtils.setField(card, "user", user);
+        alertService.sendMessage("slackId", "test");
 
         // 메서드 호출 및 검증
         SaveCommentResponse response = commentService.saveComment(authUser, reqDto, cardId);
@@ -150,7 +158,7 @@ public class CommentServiceTest {
         Card card = new Card();
         ReflectionTestUtils.setField(card, "id", cardId);
         WorkSpace workSpace = new WorkSpace();
-        ReflectionTestUtils.setField(workSpace,"id",1L);
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
         // Card의 List와 Board 초기화
         com.sparta.sal.domain.list.entity.List list = new com.sparta.sal.domain.list.entity.List();
         Board board = new Board();
@@ -224,11 +232,14 @@ public class CommentServiceTest {
         Comment comment = new Comment();
         ReflectionTestUtils.setField(comment, "id", commentId);
         User commentUser = new User();
+        ReflectionTestUtils.setField(commentUser, "slackId", "test");
         ReflectionTestUtils.setField(commentUser, "id", userId);
         ReflectionTestUtils.setField(comment, "user", commentUser);
+        ReflectionTestUtils.setField(card, "user", commentUser);
 
         given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
         given(commentRepository.save(comment)).willReturn(comment);
+        alertService.sendMessage("slackId", "test");
 
         ModifyCommentResponse response = commentService.modifyComment(authUser, cardId, commentId, reqDto);
 

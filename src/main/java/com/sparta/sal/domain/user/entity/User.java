@@ -2,10 +2,14 @@ package com.sparta.sal.domain.user.entity;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.entity.Timestamped;
+import com.sparta.sal.domain.member.entity.Member;
 import com.sparta.sal.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -19,22 +23,30 @@ public class User extends Timestamped {
 
     @Column(unique = true, length = 256)
     private String email;
+
     private String password;
+
     private String name;
+
+    private String slackId;
 
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
     private Boolean userStatus = true;
 
-    private User(String email, String password, UserRole userRole) {
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Member> memberList = new ArrayList<>();
+
+    private User(String email, String password, UserRole userRole, String name) {
         this.email = email;
         this.password = password;
         this.userRole = userRole;
+        this.name = name;
     }
 
-    public static User from(String email, String password, UserRole userRole) {
-        return new User(email, password, userRole);
+    public static User from(String email, String password, UserRole userRole, String name) {
+        return new User(email, password, userRole, name);
     }
 
     private User(Long id, String email, UserRole userRole) {
@@ -53,5 +65,9 @@ public class User extends Timestamped {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public void updateSlackID(String slackId) {
+        this.slackId = slackId;
     }
 }

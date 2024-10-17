@@ -51,7 +51,6 @@ jobs:
         run: docker logout ${{ steps.ecr-login.outputs.registry }}
 
   CD:
-    name: EC2에 배포
     runs-on: ubuntu-latest
     needs: CI
     steps:
