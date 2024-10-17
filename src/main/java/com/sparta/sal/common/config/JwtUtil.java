@@ -29,7 +29,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 24 * 3 * 1000L; // 3일
+    private static final long TOKEN_TIME = 60 * 60 * 1000L; // 1시간
     private final HttpServletResponse httpServletResponse;
 
     @Value("${jwt.secret.key}")
@@ -71,7 +71,7 @@ public class JwtUtil {
 
             Cookie cookie = new Cookie("Authorization", encodeToken); // Name-Value
             cookie.setHttpOnly(true); // 자바스크립트에서 쿠키에 접근할 수 없도록 설정
-            cookie.setMaxAge(60 * 60 * 24 * 3); // 쿠키의 유효 기간 설정(1시간)
+            cookie.setMaxAge(60 * 60); // 쿠키의 유효 기간 설정(1시간)
             cookie.setPath("/");
 
             // Response 객체에 Cookie 추가

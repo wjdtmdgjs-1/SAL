@@ -2,7 +2,9 @@ package com.sparta.sal.domain.user;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.domain.member.repository.MemberRepository;
 import com.sparta.sal.domain.user.dto.request.UserChangePasswordRequest;
+import com.sparta.sal.domain.user.dto.request.UserWithdrawRequest;
 import com.sparta.sal.domain.user.dto.response.UserResponse;
 import com.sparta.sal.domain.user.entity.User;
 import com.sparta.sal.domain.user.enums.UserRole;
@@ -31,6 +33,9 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private MemberRepository memberRepository;
 
     @Test
     void getUser_validUser() {
@@ -64,10 +69,12 @@ public class UserServiceTest {
         User user = new User();
         ReflectionTestUtils.setField(user, "id", userId);
         ReflectionTestUtils.setField(user, "userStatus", true);
+        UserWithdrawRequest request = new UserWithdrawRequest("password");
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(request.getPassword(), user.getPassword())).willReturn(true);
 
-        userService.withdrawUser(authUser);
+        userService.withdrawUser(authUser, request);
 
         assertFalse(user.getUserStatus());
     }
@@ -76,10 +83,11 @@ public class UserServiceTest {
     void withdrawUser_invalidUser() {
         long userId = 1L;
         AuthUser authUser = AuthUser.from(userId, "test@example.com", UserRole.ROLE_USER);
+        UserWithdrawRequest request = new UserWithdrawRequest("password");
         given(userRepository.findById(userId)).willReturn(Optional.empty());
 
         InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
-                userService.withdrawUser(authUser));
+                userService.withdrawUser(authUser, request));
         assertEquals("User not found", exception.getMessage());
     }
 

@@ -2,6 +2,7 @@ package com.sparta.sal.domain.workspace;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.domain.member.entity.Member;
 import com.sparta.sal.domain.member.enums.MemberRole;
 import com.sparta.sal.domain.member.repository.MemberRepository;
@@ -24,7 +25,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -43,6 +43,9 @@ public class WorkSpaceServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private AlertService alertService;
 
     @Test
     void saveWorkSpace() {
@@ -64,12 +67,14 @@ public class WorkSpaceServiceTest {
 
         given(userService.isValidUser(userId)).willReturn(user);
         given(workSpaceRepository.save(any(WorkSpace.class))).willReturn(workSpace);
+        alertService.createSlackChannel(workSpace);
 
         WorkSpaceTitleResponseDto response = workSpaceService.saveWorkSpace(authUser, workSpaceSaveRequestDto);
 
         assertNotNull(response);
         verify(memberRepository).save(any(Member.class));
     }
+
     @Test
     void updateWorkSpace_validUser() {
         long userId = 1L;
