@@ -6,7 +6,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.sparta.sal.common.exception.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.boot.Metadata;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +16,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 s3client;
-    private final String bucketName = "juho-first-s3";
+    private final String bucketName = "sparta-sal";
     private final String region = "ap-northeast-2";
 
     public String uploadFile(MultipartFile file) throws IOException {
         // 파일 형식 체크
         String contentType = file.getContentType();
 
-        if(contentType==null) {
+        if (contentType == null) {
             return null;
         }
 
