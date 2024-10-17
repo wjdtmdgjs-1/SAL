@@ -102,7 +102,20 @@ public class CardService {
         }
 
         card.modifyCard(reqDto);
-        return new ModifyCardResponse(cardRepository.save(card));
+        int isModify = cardRepository.updateCardById(
+                card.getId(),
+                card.getCardTitle(),
+                card.getCardExplain(),
+                card.getDeadline(),
+                card.getAttachment());
+
+        if (isModify == 0) {
+            throw new InvalidRequestException("카드 수정에 실패했습니다.");
+        }
+        Card updatedCard = cardRepository.findByIdWithPessimisticLock(card.getId())
+                .orElseThrow(() -> new InvalidRequestException("카드를 찾을 수 없습니다."));
+
+        return new ModifyCardResponse(updatedCard);
     }
 
     /**
