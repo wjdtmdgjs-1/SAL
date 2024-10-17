@@ -1,4 +1,4 @@
-package com.sparta.sal.domain.s3.config;
+package com.sparta.sal.common.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class S3Config {
-    @Value("${accessKeyId}")
+    @Value("${aws.accessKeyId}")
     private String accessKey;
-    @Value("${secretAccessKey}")
+    @Value("${aws.secretAccessKey}")
     private String secretKey;
-    @Value("${region}")
+    @Value("${aws.region}")
     private String region;
 
     @Bean
