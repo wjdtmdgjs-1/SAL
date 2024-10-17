@@ -23,6 +23,10 @@ repositories {
     mavenCentral()
 }
 
+bootBuildImage {
+    imageName = 'sal:0.0.1-SNAPSHOT'
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -39,6 +43,17 @@ dependencies {
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+    implementation("com.slack.api:bolt:1.31.0")
+    implementation("com.slack.api:bolt-servlet:1.31.0")
+    implementation("com.slack.api:bolt-jetty:1.31.0")
+    implementation("org.slf4j:slf4j-simple:1.7.36")
+
+    implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.40.2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {
