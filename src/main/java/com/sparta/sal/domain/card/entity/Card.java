@@ -3,6 +3,7 @@ package com.sparta.sal.domain.card.entity;
 import com.sparta.sal.common.entity.Timestamped;
 import com.sparta.sal.domain.assignee.entity.Assignee;
 import com.sparta.sal.domain.card.dto.request.ModifyCardRequest;
+import com.sparta.sal.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,11 +34,16 @@ public class Card extends Timestamped {
     @JoinColumn(name = "list_id", nullable = false)
     private com.sparta.sal.domain.list.entity.List list;
 
-    public Card(String title, String cardExplain, LocalDateTime deadline, String filename) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public Card(String title, String cardExplain, LocalDateTime deadline, String filename, User user) {
         this.cardTitle = title;
         this.cardExplain = cardExplain;
         this.deadline = deadline;
         this.attachment = filename;
+        this.user = user;
     }
 
     public void modifyCard(ModifyCardRequest reqDto) {

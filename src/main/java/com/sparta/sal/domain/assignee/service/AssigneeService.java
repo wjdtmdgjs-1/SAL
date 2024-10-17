@@ -2,6 +2,7 @@ package com.sparta.sal.domain.assignee.service;
 
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.common.exception.InvalidRequestException;
+import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.domain.assignee.dto.response.GetAssigneeResponse;
 import com.sparta.sal.domain.assignee.dto.response.SaveAssigneeResponse;
 import com.sparta.sal.domain.assignee.entity.Assignee;
@@ -24,6 +25,7 @@ public class AssigneeService {
     private final AssigneeRepository assigneeRepository;
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
+    private final AlertService alertService;
 
     @Transactional
     public SaveAssigneeResponse saveAssignee(AuthUser authUser, long cardId) {
@@ -42,6 +44,9 @@ public class AssigneeService {
         Assignee assignee = new Assignee(card, member);
         assigneeRepository.save(assignee);
 
+        alertService.sendMessage(member.getWorkSpace().getSlackChannel()
+                , member.getUser().getName() + "님이 카드 " + card.getCardTitle() + "에 담당자를 추가하셨습니다.");
+
         return new SaveAssigneeResponse(assignee);
 
     }
@@ -56,6 +61,9 @@ public class AssigneeService {
         Assignee assignee = assigneeRepository.findById(assigneeId)
                 .orElseThrow(() -> new InvalidRequestException("담당자를 찾을 수 없습니다."));
         assigneeRepository.delete(assignee);
+
+        alertService.sendMessage(assignee.getMember().getWorkSpace().getSlackChannel()
+                , assignee.getMember().getUser().getName() + "님이 카드 " + assignee.getCard().getCardTitle() + "를 수정하셨습니다.");
     }
 
     private Member checkRole(Card card, AuthUser authUser) {

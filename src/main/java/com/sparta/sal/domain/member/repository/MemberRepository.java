@@ -2,6 +2,7 @@ package com.sparta.sal.domain.member.repository;
 
 import com.sparta.sal.domain.member.entity.Member;
 import com.sparta.sal.domain.member.enums.MemberRole;
+import com.sparta.sal.domain.user.entity.User;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> checkDuplicate(@Param("workSpaceId") long workSpaceId, @Param("userId") long userId);
 
     Optional<Member> findByWorkSpace_IdAndUser_Id(long workSpaceId, long userId);
+
+    List<Member> findAllByUser(User user);
 }

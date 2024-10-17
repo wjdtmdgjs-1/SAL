@@ -7,7 +7,6 @@ import com.sparta.sal.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.scheduling.config.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,8 @@ public class WorkSpace extends Timestamped {
 
     private String explains;
 
+    private String slackChannel;
+
     @OneToMany(mappedBy = "workSpace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> memberList = new ArrayList<>();
 
@@ -35,15 +36,19 @@ public class WorkSpace extends Timestamped {
     @OneToMany(mappedBy = "workSpace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>();
 
-    public WorkSpace(Long makerId,String workSpaceTitle, String explain) {
-        this.makerId=makerId;
+    public WorkSpace(Long makerId, String workSpaceTitle, String explain) {
+        this.makerId = makerId;
         this.workSpaceTitle = workSpaceTitle;
         this.explains = explain;
     }
 
     public void update(String workSpaceTitle, String explain) {
-        this.workSpaceTitle=workSpaceTitle;
-        this.explains=explain;
+        this.workSpaceTitle = workSpaceTitle;
+        this.explains = explain;
+    }
+
+    public void updateSlackChannel(String slackChannel) {
+        this.slackChannel = slackChannel;
     }
 
     public boolean isMember(AuthUser authUser) {
