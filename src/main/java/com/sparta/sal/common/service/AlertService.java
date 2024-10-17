@@ -14,6 +14,7 @@ import com.sparta.sal.common.exception.InputOutputException;
 import com.sparta.sal.common.exception.SlackException;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class AlertService {
     @Value("${slack.bot.token}")
     private String slackToken;
 
+    @Async
     public void sendMessage(String slackChannel, String message) {
         Slack slack = Slack.getInstance();
 
@@ -49,6 +51,7 @@ public class AlertService {
         }
     }
 
+    @Async
     public void createSlackChannel(WorkSpace workSpace) {
         Slack slack = Slack.getInstance();
 
@@ -97,6 +100,7 @@ public class AlertService {
         return response.getUser().getId();
     }
 
+    @Async
     public void inviteSlackChannel(String channelId, String slackId) {
         Slack slack = Slack.getInstance();
 
