@@ -60,11 +60,11 @@ public class CardQueryRepositoryImpl implements CardQueryRepository {
     }
 
     private BooleanExpression cardTitleContains(String title) {
-        return title != null ? QCard.card.cardTitle.containsIgnoreCase(title) : null;
+        return title != null ? QCard.card.cardTitle.eq(title) : null;
     }
 
     private BooleanExpression cardExplainContains(String explain) {
-        return explain != null ? QCard.card.cardExplain.containsIgnoreCase(explain) : null;
+        return explain != null ? QCard.card.cardExplain.eq(explain) : null;
     }
 
     private BooleanExpression deadlineEq(LocalDate duedate) {
