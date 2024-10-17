@@ -3,6 +3,7 @@ package com.sparta.sal.common.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,6 +12,7 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
 
+    @Async
     public void sendSlackInviteEmail(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("SAL의 Slack 워크스페이스로 초대합니다!!");
@@ -20,6 +22,7 @@ public class MailService {
         javaMailSender.send(message);
     }
 
+    @Async
     public void sendFindPasswordToken(String email, String token) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("SAL의 비밀번호 재설정을 위한 인증번호입니다.");
