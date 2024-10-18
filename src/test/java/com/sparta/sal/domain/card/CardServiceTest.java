@@ -21,6 +21,7 @@ import com.sparta.sal.common.service.AlertService;
 import com.sparta.sal.common.service.S3Service;
 import com.sparta.sal.common.dto.AuthUser;
 import com.sparta.sal.domain.workspace.entity.WorkSpace;
+import org.hibernate.jdbc.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,7 @@ import java.util.Optional;
 
 import static com.sparta.sal.domain.user.entity.QUser.user;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -262,5 +264,114 @@ public class CardServiceTest {
 
         assertNotNull(url);
         assertEquals("attachmentUrl", url);
+    }
+
+    @Test
+    void modifyCard_Success() {
+        // Arrange
+        Long listId = 1L;
+        Long cardId = 1L;
+        AuthUser authUser = AuthUser.from(1L, "user@example.com", UserRole.ROLE_USER);
+        User user = User.from("a@a.com","aaaaaaaA1!",UserRole.ROLE_USER,"name");
+        ModifyCardRequest reqDto = new ModifyCardRequest();
+        ReflectionTestUtils.setField(reqDto,"title","Updated Title");
+        ReflectionTestUtils.setField(reqDto,"cardExplain","Updated cardExplain");
+
+        WorkSpace workSpace = new WorkSpace();
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+
+        Board board = new Board();
+        ReflectionTestUtils.setField(board, "id", 1L);
+        ReflectionTestUtils.setField(board, "workSpace", workSpace);
+
+        List list = new List(); // List 객체 생성 및 설정
+        ReflectionTestUtils.setField(list, "id", listId);
+        ReflectionTestUtils.setField(list, "board", board);
+
+        Card card = new Card();
+        ReflectionTestUtils.setField(card, "id", cardId);
+        ReflectionTestUtils.setField(card, "cardTitle", "Original Title");
+        ReflectionTestUtils.setField(card, "isDeleted", false);
+        ReflectionTestUtils.setField(card, "list", list);
+
+        Member member = new Member();
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.BOARD);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+
+        given(cardRepository.findById(cardId)).willReturn(Optional.of(card));
+        given(listRepository.findById(listId)).willReturn(Optional.of(list));
+        given(memberRepository.findByWorkSpace_IdAndUser_Id(anyLong(), anyLong())).willReturn(Optional.of(member));
+        given(cardRepository.save(any(Card.class))).willReturn(card);
+
+        // Act
+        ModifyCardResponse response = cardService.modifyCard(listId, authUser, cardId, reqDto);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("Updated Title", response.getTitle());
+        assertEquals("Updated cardExplain", response.getCardExplain());
+    }
+
+    @Test
+    void modifyCard_Success_PessimisticLock() throws InterruptedException{
+        // Arrange
+        Long listId = 1L;
+        Long cardId = 1L;
+        AuthUser authUser = AuthUser.from(1L, "user@example.com", UserRole.ROLE_USER);
+        User user = User.from("a@a.com","aaaaaaaA1!",UserRole.ROLE_USER,"name");
+        ModifyCardRequest reqDto = new ModifyCardRequest();
+        ReflectionTestUtils.setField(reqDto,"title","Updated Title");
+        ReflectionTestUtils.setField(reqDto,"cardExplain","Updated cardExplain");
+
+        WorkSpace workSpace = new WorkSpace();
+        ReflectionTestUtils.setField(workSpace, "id", 1L);
+
+        Board board = new Board();
+        ReflectionTestUtils.setField(board, "id", 1L);
+        ReflectionTestUtils.setField(board, "workSpace", workSpace);
+
+        List list = new List(); // List 객체 생성 및 설정
+        ReflectionTestUtils.setField(list, "id", listId);
+        ReflectionTestUtils.setField(list, "board", board);
+
+        Card card = new Card();
+        ReflectionTestUtils.setField(card, "id", cardId);
+        ReflectionTestUtils.setField(card, "cardTitle", "Original Title");
+        ReflectionTestUtils.setField(card, "isDeleted", false);
+        ReflectionTestUtils.setField(card, "list", list);
+
+        Member member = new Member();
+        ReflectionTestUtils.setField(member, "memberRole", MemberRole.BOARD);
+        ReflectionTestUtils.setField(member, "workSpace", workSpace);
+        ReflectionTestUtils.setField(member, "user", user);
+
+        given(cardRepository.findById(cardId)).willReturn(Optional.of(card));
+        given(listRepository.findById(listId)).willReturn(Optional.of(list));
+        given(memberRepository.findByWorkSpace_IdAndUser_Id(anyLong(), anyLong())).willReturn(Optional.of(member));
+        given(cardRepository.save(any(Card.class))).willReturn(card);
+
+        // 10개의 스레드를 만들어서 동시에 modifyCard 메서드를 호출
+        Thread[] threads = new Thread[10];
+        for (int i = 0; i < 10; i++) {
+            threads[i] = new Thread(() -> {
+                try {
+                    cardService.modifyCard(listId, authUser, cardId, reqDto);
+                } catch (InvalidRequestException e) {
+                    // 예외 발생 시 로깅 또는 다른 처리
+                }
+            });
+            threads[i].start();
+        }
+
+        // 모든 스레드가 종료될 때까지 기다림
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Assert: 예외가 발생하지 않아야 합니다.
+        assertDoesNotThrow(() -> {
+            cardService.modifyCard(listId, authUser, cardId, reqDto);
+        });
     }
 }
