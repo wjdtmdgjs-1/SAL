@@ -35,7 +35,7 @@ public interface CardRepository extends JpaRepository<Card, Long>, CardQueryRepo
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Card c where c.id = :id")
-    Optional<Card> findByIdWithPessimisticLock(Long id);
+    Optional<Card> findByIdWithPessimisticLock(@Param("id") Long id);
 
 
     Page<Card> searchCards(Long id, String cardTitle, String cardExplain, LocalDate duedate, String deadline, Pageable pageable);
