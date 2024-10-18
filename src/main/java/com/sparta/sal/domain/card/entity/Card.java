@@ -15,7 +15,10 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "card")
+@Table(name = "card" , indexes = {
+        @Index(name = "idx_card_title", columnList = "card_title"),
+        @Index(name = "idx_card_explain", columnList = "card_explain")
+})
 public class Card extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
