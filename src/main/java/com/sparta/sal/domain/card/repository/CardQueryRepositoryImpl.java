@@ -74,5 +74,4 @@ public class CardQueryRepositoryImpl implements CardQueryRepository {
     private BooleanExpression assigneeNameEq(String assigneeName) {
         return assigneeName != null ? QAssignee.assignee.member.user.name.eq(assigneeName): null;
     }
-
 }
