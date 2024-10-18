@@ -267,24 +267,26 @@ public class CardServiceTest {
     }
 
     @Test
-    void modifyCard_Success() {
+    void modifyCard_success() {
         // Arrange
         Long listId = 1L;
         Long cardId = 1L;
         AuthUser authUser = AuthUser.from(1L, "user@example.com", UserRole.ROLE_USER);
-        User user = User.from("a@a.com","aaaaaaaA1!",UserRole.ROLE_USER,"name");
+        User user = User.from("a@a.com", "aaaaaaaA1!", UserRole.ROLE_USER, "name");
+
         ModifyCardRequest reqDto = new ModifyCardRequest();
-        ReflectionTestUtils.setField(reqDto,"title","Updated Title");
-        ReflectionTestUtils.setField(reqDto,"cardExplain","Updated cardExplain");
+        ReflectionTestUtils.setField(reqDto, "title", "Updated Title");
+        ReflectionTestUtils.setField(reqDto, "cardExplain", "Updated cardExplain");
 
         WorkSpace workSpace = new WorkSpace();
         ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(workSpace, "slackChannel", "zz");
 
         Board board = new Board();
         ReflectionTestUtils.setField(board, "id", 1L);
         ReflectionTestUtils.setField(board, "workSpace", workSpace);
 
-        List list = new List(); // List 객체 생성 및 설정
+        List list = new List();
         ReflectionTestUtils.setField(list, "id", listId);
         ReflectionTestUtils.setField(list, "board", board);
 
@@ -299,39 +301,44 @@ public class CardServiceTest {
         ReflectionTestUtils.setField(member, "workSpace", workSpace);
         ReflectionTestUtils.setField(member, "user", user);
 
-        given(cardRepository.findById(cardId)).willReturn(Optional.of(card));
+        // Mocking repository behaviors
+        given(cardRepository.findByIdWithPessimisticLock(cardId)).willReturn(Optional.of(card));
         given(listRepository.findById(listId)).willReturn(Optional.of(list));
         given(memberRepository.findByWorkSpace_IdAndUser_Id(anyLong(), anyLong())).willReturn(Optional.of(member));
-        given(cardRepository.save(any(Card.class))).willReturn(card);
+        given(cardRepository.updateCardById(anyLong(), anyString(), anyString(), any(), any())).willReturn(1);
+
+        // Mocking the Slack alert service
+        doNothing().when(alertService).sendMessage(anyString(), anyString());
 
         // Act
         ModifyCardResponse response = cardService.modifyCard(listId, authUser, cardId, reqDto);
 
         // Assert
-        assertNotNull(response);
         assertEquals("Updated Title", response.getTitle());
         assertEquals("Updated cardExplain", response.getCardExplain());
+        verify(alertService).sendMessage(anyString(), contains("님이 카드 Updated Title를 수정하셨습니다."));
     }
-
     @Test
-    void modifyCard_Success_PessimisticLock() throws InterruptedException{
+    void modifyCard_PessimisticLock_WithoutLock() throws InterruptedException {
         // Arrange
         Long listId = 1L;
         Long cardId = 1L;
         AuthUser authUser = AuthUser.from(1L, "user@example.com", UserRole.ROLE_USER);
-        User user = User.from("a@a.com","aaaaaaaA1!",UserRole.ROLE_USER,"name");
+        User user = User.from("a@a.com", "aaaaaaaA1!", UserRole.ROLE_USER, "name");
+
         ModifyCardRequest reqDto = new ModifyCardRequest();
-        ReflectionTestUtils.setField(reqDto,"title","Updated Title");
-        ReflectionTestUtils.setField(reqDto,"cardExplain","Updated cardExplain");
+        ReflectionTestUtils.setField(reqDto, "title", "Updated Title");
+        ReflectionTestUtils.setField(reqDto, "cardExplain", "Updated cardExplain");
 
         WorkSpace workSpace = new WorkSpace();
         ReflectionTestUtils.setField(workSpace, "id", 1L);
+        ReflectionTestUtils.setField(workSpace, "slackChannel", "zz");
 
         Board board = new Board();
         ReflectionTestUtils.setField(board, "id", 1L);
         ReflectionTestUtils.setField(board, "workSpace", workSpace);
 
-        List list = new List(); // List 객체 생성 및 설정
+        List list = new List();
         ReflectionTestUtils.setField(list, "id", listId);
         ReflectionTestUtils.setField(list, "board", board);
 
@@ -346,32 +353,40 @@ public class CardServiceTest {
         ReflectionTestUtils.setField(member, "workSpace", workSpace);
         ReflectionTestUtils.setField(member, "user", user);
 
-        given(cardRepository.findById(cardId)).willReturn(Optional.of(card));
+        // Mocking repository behaviors
+        given(cardRepository.findByIdWithPessimisticLock(cardId)).willReturn(Optional.of(card));
         given(listRepository.findById(listId)).willReturn(Optional.of(list));
         given(memberRepository.findByWorkSpace_IdAndUser_Id(anyLong(), anyLong())).willReturn(Optional.of(member));
-        given(cardRepository.save(any(Card.class))).willReturn(card);
+        given(cardRepository.updateCardById(anyLong(), anyString(), anyString(), any(), any())).willReturn(1);
 
-        // 10개의 스레드를 만들어서 동시에 modifyCard 메서드를 호출
+        // Act
+        Runnable task = () -> {
+            try {
+                cardService.modifyCard(listId, authUser, cardId, reqDto);
+            } catch (Exception e) {
+                // Handle exception if necessary
+            }
+        };
+
         Thread[] threads = new Thread[10];
         for (int i = 0; i < 10; i++) {
-            threads[i] = new Thread(() -> {
-                try {
-                    cardService.modifyCard(listId, authUser, cardId, reqDto);
-                } catch (InvalidRequestException e) {
-                    // 예외 발생 시 로깅 또는 다른 처리
-                }
-            });
+            threads[i] = new Thread(task);
             threads[i].start();
         }
 
-        // 모든 스레드가 종료될 때까지 기다림
         for (Thread thread : threads) {
             thread.join();
         }
 
-        // Assert: 예외가 발생하지 않아야 합니다.
-        assertDoesNotThrow(() -> {
-            cardService.modifyCard(listId, authUser, cardId, reqDto);
-        });
+        // Assert
+        // 비관적 잠금이 없으므로 모든 스레드가 성공적으로 수정했으면 안 됨
+        Card updatedCard = cardRepository.findByIdWithPessimisticLock(cardId)
+                .orElseThrow(() -> new InvalidRequestException("카드를 찾을 수 없습니다."));
+
+        // 확인: 마지막 스레드의 수정 내용이 반영되었는지
+        assertEquals("Updated Title", updatedCard.getCardTitle());
+        assertEquals("Updated cardExplain", updatedCard.getCardExplain());
     }
+
+
 }

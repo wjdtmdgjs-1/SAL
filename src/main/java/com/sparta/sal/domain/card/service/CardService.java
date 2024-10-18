@@ -103,7 +103,7 @@ public class CardService {
      */
     @Transactional
     public ModifyCardResponse modifyCard(Long listId, AuthUser authUser, Long cardId, ModifyCardRequest reqDto) {
-        Card card = cardRepository.findById(cardId)
+        Card card = cardRepository.findByIdWithPessimisticLock(cardId)
                 .orElseThrow(() -> new InvalidRequestException("카드를 찾을 수 없습니다."));
 
         if (card.isDeleted()) {
@@ -133,10 +133,7 @@ public class CardService {
                 , member.getUser().getName() + "님이 카드 " + card.getCardTitle() + "를 수정하셨습니다.");
 
 
-        Card updatedCard = cardRepository.findByIdWithPessimisticLock(card.getId())
-                .orElseThrow(() -> new InvalidRequestException("카드를 찾을 수 없습니다."));
-
-        return new ModifyCardResponse(updatedCard);
+        return new ModifyCardResponse(card);
     }
 
     /**
