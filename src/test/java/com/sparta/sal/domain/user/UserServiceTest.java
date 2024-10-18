@@ -96,22 +96,28 @@ public class UserServiceTest {
         long userId = 1L;
         AuthUser authUser = AuthUser.from(userId, "test@example.com", UserRole.ROLE_USER);
         UserChangePasswordRequest request = new UserChangePasswordRequest();
+
+        // 필드 주입
         ReflectionTestUtils.setField(request, "oldPassword", "oldPassword");
-        ReflectionTestUtils.setField(request, "newPassword", "newPassword");
+        ReflectionTestUtils.setField(request, "newPassword", "newPassword1");
 
         User user = new User();
         ReflectionTestUtils.setField(user, "id", userId);
-        ReflectionTestUtils.setField(user, "password", "encodedOldPassword");
+        ReflectionTestUtils.setField(user, "password", "encodedOldPassword1");
 
+        // Mocking
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(passwordEncoder.matches("oldPassword", user.getPassword())).willReturn(true);
-        given(passwordEncoder.matches("newPassword", user.getPassword())).willReturn(false);
-        given(passwordEncoder.encode("newPassword")).willReturn("encodedNewPassword");
+        given(passwordEncoder.matches("newPassword1", user.getPassword())).willReturn(false); // newPassword1과 현재 비밀번호를 비교
+        given(passwordEncoder.encode("newPassword1")).willReturn("encodedNewPassword");
 
+        // 비밀번호 변경 실행
         userService.changePassword(authUser, request);
 
+        // 비밀번호가 업데이트 되었는지 확인
         assertEquals("encodedNewPassword", user.getPassword());
     }
+
 
     @Test
     void changePassword_invalidOldPassword() {
